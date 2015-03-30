@@ -66,11 +66,11 @@ function getUsers()
     try{
         $stmt   = $db->query($sql);
         $users  = $stmt->fetchAll(PDO::FETCH_NAMED);
-        $response["header"]["error"] = 0;
+        $response["header"]["error"] = "0";
         $response["header"]["message"] = "Success";
     }
     catch(PDOException $e){
-        $response["header"]["error"] = 1;
+        $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
     }
 
@@ -100,11 +100,11 @@ function getBabyProfile($user_id)
         {
             $users = $data;
         }
-        $response["header"]["error"] = 0;
+        $response["header"]["error"] = "0";
         $response["header"]["message"] = "Success";
     }
     catch(PDOException $e){
-        $response["header"]["error"] = 1;
+        $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
     }
 
@@ -367,19 +367,19 @@ function getProfile($params){
 
 
 
-            $response["header"]["error"] = 0;
+            $response["header"]["error"] = "0";
             $response["header"]["message"] = "Success";
             $response["body"] = $info;
         }
         else
         {
-            $response["header"]["error"] = 1;
+            $response["header"]["error"] = "1";
             $response["header"]["message"] = "User not exist";
         }
 
     }
     catch(PDOException $e){
-        $response["header"]["error"] = 1;
+        $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
     }
 
@@ -458,32 +458,32 @@ function login(){
                     $stmt->execute();
 
                 }
-                $response["header"]["error"] = 0;
+                $response["header"]["error"] = "0";
                 $response["header"]["message"] = "Success";
             }
             elseif($data["password"] == MD5($password) && $data['verified'] == 0)
             {
-                $response["header"]["error"] = 1;
+                $response["header"]["error"] = "1";
                 $response["header"]["message"] = "Email address not verified";
             }
             else
             {
                 $data = array();
-                $response["header"]["error"] = 1;
+                $response["header"]["error"] = "1";
                 $response["header"]["message"] = "Username or password incorrect";
             }
 
         }
         else
         {
-            $response["header"]["error"] = 1;
+            $response["header"]["error"] = "1";
             $response["header"]["message"] = "User is not signed up";
         }
 
 
     }
     catch(PDOException $e){
-        $response["header"]["error"] = 1;
+        $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
     }
 
@@ -578,7 +578,7 @@ function signup() {
                 $path = substr($_SERVER['REQUEST_URI'],0,stripos($_SERVER['REQUEST_URI'], "index.php"));
                 $user_image = $protocol.$_SERVER['SERVER_NAME'].$path.$user_image;
             } else {
-                $response["header"]["error"] = 1;
+                $response["header"]["error"] = "1";
                 $response["header"]["message"] = 'Some error';
             }
         }
@@ -601,20 +601,20 @@ function signup() {
 
                 $user["user_id"] = $db->lastInsertId();
                 $response["body"] = $user;
-                $response["header"]["error"] = 0;
+                $response["header"]["error"] = "0";
                 $response["header"]["message"] = "Success";
 
             }
             catch(PDOException $e)
             {
-                $response["header"]["error"] = 1;
+                $response["header"]["error"] = "1";
                 $response["header"]["message"] = $e->getMessage();
             }
         }
     }
     else
     {
-        $response["header"]["error"] = 1;
+        $response["header"]["error"] = "1";
         $response["header"]["message"] = 'User already exist';
     }
 
@@ -655,7 +655,7 @@ function setBabyProfile() {
                 $path = substr($_SERVER['REQUEST_URI'],0,stripos($_SERVER['REQUEST_URI'], "index.php"));
                 $user_image = $protocol.$_SERVER['SERVER_NAME'].$path.$user_image;
             } else {
-                $response["header"]["error"] = 1;
+                $response["header"]["error"] = "1";
                 $response["header"]["message"] = 'Some error';
             }
         }
@@ -674,20 +674,20 @@ function setBabyProfile() {
 
                 $user["baby_id"] = $db->lastInsertId();
                 $response["body"] = $user;
-                $response["header"]["error"] = 0;
+                $response["header"]["error"] = "0";
                 $response["header"]["message"] = "Success";
 
             }
             catch(PDOException $e)
             {
-                $response["header"]["error"] = 1;
+                $response["header"]["error"] = "1";
                 $response["header"]["message"] = $e->getMessage();
             }
         }
     }
     else
     {
-        $response["header"]["error"] = 1;
+        $response["header"]["error"] = "1";
         $response["header"]["message"] = 'You already have one baby';
     }
 
@@ -725,13 +725,13 @@ function updateBabyGrowth() {
 
         $user["growth_id"] = $db->lastInsertId();
         $response["body"] = array();
-        $response["header"]["error"] = 0;
+        $response["header"]["error"] = "0";
         $response["header"]["message"] = "Success";
 
     }
     catch(PDOException $e)
     {
-        $response["header"]["error"] = 1;
+        $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
     }
 
@@ -769,13 +769,13 @@ function getBabyGrowth() {
         $growth  = $stmt->fetchAll(PDO::FETCH_NAMED);
 
         $response["body"] = $growth;
-        $response["header"]["error"] = 0;
+        $response["header"]["error"] = "0";
         $response["header"]["message"] = "Success";
 
     }
     catch(PDOException $e)
     {
-        $response["header"]["error"] = 1;
+        $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
     }
 
@@ -817,7 +817,7 @@ function editProfile() {
                 $path = substr($_SERVER['REQUEST_URI'],0,stripos($_SERVER['REQUEST_URI'], "index.php"));
                 $user_image = $protocol.$_SERVER['SERVER_NAME'].$path.$user_image;
             } else {
-                $response["header"]["error"] = 1;
+                $response["header"]["error"] = "1";
                 $response["header"]["message"] = 'Some error';
             }
         }
@@ -853,20 +853,20 @@ function editProfile() {
      $stmt->bindParam(":user_id",$user_id);
      $stmt->execute() ;
 
-     $response["header"]["error"] = 0;
+     $response["header"]["error"] = "0";
      $response["header"]["message"] = "Success";
 
  }
  catch(PDOException $e)
  {
-    $response["header"]["error"] = 1;
+    $response["header"]["error"] = "1";
     $response["header"]["message"] = $e->getMessage();
 }
 }
 }
 else
 {
-    $response["header"]["error"] = 1;
+    $response["header"]["error"] = "1";
     $response["header"]["message"] = 'User not exist';
 }
 
@@ -950,7 +950,7 @@ function imgSave()
 
     if(!isset($_FILES['file']))
     {
-        $response["header"]["error"] = 1;
+        $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
     }
     else
@@ -960,10 +960,10 @@ function imgSave()
         $uploadfile = $uploaddir . $file;
 
         if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadfile)) {
-            $response["header"]["error"] = 0;
+            $response["header"]["error"] = "0";
             $response["header"]["message"] = $uploadfile;
         } else {
-            $response["header"]["error"] = 1;
+            $response["header"]["error"] = "1";
             $response["header"]["message"] = 'Some error';
         }
     }
@@ -991,13 +991,13 @@ function sendMessage()
         $stmt->bindParam(":to", $to);
         $stmt->bindParam(":datetime", $date);
         $stmt->execute();
-        $response["header"]["error"] = 0;
+        $response["header"]["error"] = "0";
         $response["header"]["message"] = "Success";
 
 
     }
     catch(PDOException $e){
-        $response["header"]["error"] = 1;
+        $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
     }
 
@@ -1028,7 +1028,7 @@ function updatePassword()
 
             if($data['password'] != MD5($old_password))
             {
-                $response["header"]["error"] = 1;
+                $response["header"]["error"] = "1";
                 $response["header"]["message"] = 'Password do not match';
             }
             else
@@ -1042,19 +1042,19 @@ function updatePassword()
                 $stmt->bindParam(":user_id", $user_id);
 
                 $stmt->execute();
-                $response["header"]["error"] = 0;
+                $response["header"]["error"] = "0";
                 $response["header"]["message"] = "Success";
             }
         }
         else
         {
-            $response["header"]["error"] = 1;
+            $response["header"]["error"] = "1";
             $response["header"]["message"] = 'Some error';
         }
 
     }
     catch(PDOException $e){
-        $response["header"]["error"] = 1;
+        $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
     }
 
@@ -1099,19 +1099,19 @@ function verify($email,$code)
             $stmt->bindParam(":username", $email);
 
             $stmt->execute();
-            $response["header"]["error"] = 0;
+            $response["header"]["error"] = "0";
             $response["header"]["message"] = "Success";
 
         }
         else
         {
-            $response["header"]["error"] = 1;
+            $response["header"]["error"] = "1";
             $response["header"]["message"] = 'Some error';
         }
 
     }
     catch(PDOException $e){
-        $response["header"]["error"] = 1;
+        $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
     }
 
@@ -1157,19 +1157,19 @@ function forgotPassword()
             $email = array('to'=>$email,'subject'=>$subject, 'message'=>$message);
             sendEmail($email);
 
-            $response["header"]["error"] = 0;
+            $response["header"]["error"] = "0";
             $response["header"]["message"] = "Success";
 
         }
         else
         {
-            $response["header"]["error"] = 1;
+            $response["header"]["error"] = "1";
             $response["header"]["message"] = 'Invalid Username';
         }
 
     }
     catch(PDOException $e){
-        $response["header"]["error"] = 1;
+        $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
     }
 
