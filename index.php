@@ -418,7 +418,7 @@ function login(){
 
         if(is_array($data) && count($data))
         {
-            if($data["password"] == MD5($password) && $data['verified'] == 1)
+            if($data["password"] == MD5($password))// && $data['verified'] == 1
             {
                 $sql = "select count(*) from devices where user_id=:user_id and type=:device_type";
 
@@ -461,11 +461,11 @@ function login(){
                 $response["header"]["error"] = "0";
                 $response["header"]["message"] = "Success";
             }
-            elseif($data["password"] == MD5($password) && $data['verified'] == 0)
+            /*elseif($data["password"] == MD5($password) && $data['verified'] == 0)
             {
                 $response["header"]["error"] = "1";
                 $response["header"]["message"] = "Email address not verified";
-            }
+            }*/
             else
             {
                 $data = array();
@@ -597,7 +597,7 @@ function signup() {
                 $stmt->execute();
 
                 $email_data = array('to'=>$email,'subject'=>'Danone - Please verify your email', 'message'=>'Your verification code is '.substr($password,0,6));
-                sendEmail($email_data );
+                //sendEmail($email_data );
 
                 $user["user_id"] = $db->lastInsertId();
                 $response["body"] = $user;
