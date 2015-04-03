@@ -22,6 +22,7 @@ $response = array();
 $app->get('/users','getUsers');
 $app->get('/getBabyProfile/:user_id','getBabyProfile');
 $app->get("/getProfile/:params+",'getProfile');
+$app->get("/getFeeds/:user_id",'getFeeds');
 $app->get("/test1","test1");
 $app->get("/verify/:email/:code",'verify');
 
@@ -420,44 +421,48 @@ function login(){
         {
             if($data["password"] == MD5($password))// && $data['verified'] == 1
             {
-                $sql = "select count(*) from devices where user_id=:user_id and type=:device_type";
-
-                $stmt = $db->prepare($sql);
-                $stmt->bindParam(":user_id", $data['id']);
-                $stmt->bindParam(":device_type", $device_type);
-                $stmt->execute();
-
-                $present = $stmt->fetchColumn();
-
-
-
-                if($present != false)
+                if($device_id != "" && $device_type != "")
                 {
-                    //update
-
-                    $sql = "UPDATE devices set uid='$device_id' WHERE user_id=:user_id and type=:device_type";
+                    $sql = "select count(*) from devices where user_id=:user_id and type=:device_type";
 
                     $stmt = $db->prepare($sql);
-
                     $stmt->bindParam(":user_id", $data['id']);
                     $stmt->bindParam(":device_type", $device_type);
-
-                    $stmt->execute();
-                }
-                else
-                {
-                    //insert
-                    $sql = "insert into devices (user_id,uid,`type`) values (:user_id,:device_id,:device_type)";
-
-                    $stmt = $db->prepare($sql);
-
-                    $stmt->bindParam(":user_id", $data['user_id']);
-                    $stmt->bindParam(":device_type", $device_type);
-                    $stmt->bindParam(":device_id", $device_id);
-
                     $stmt->execute();
 
+                    $present = $stmt->fetchColumn();
+
+
+
+                    if($present != false)
+                    {
+                        //update
+
+                        $sql = "UPDATE devices set uid='$device_id' WHERE user_id=:user_id and type=:device_type";
+
+                        $stmt = $db->prepare($sql);
+
+                        $stmt->bindParam(":user_id", $data['id']);
+                        $stmt->bindParam(":device_type", $device_type);
+
+                        $stmt->execute();
+                    }
+                    else
+                    {
+                        //insert
+                        $sql = "insert into devices (user_id,uid,`type`) values (:user_id,:device_id,:device_type)";
+
+                        $stmt = $db->prepare($sql);
+
+                        $stmt->bindParam(":user_id", $data['user_id']);
+                        $stmt->bindParam(":device_type", $device_type);
+                        $stmt->bindParam(":device_id", $device_id);
+
+                        $stmt->execute();
+
+                    }
                 }
+
                 $response["header"]["error"] = "0";
                 $response["header"]["message"] = "Success";
             }
@@ -695,6 +700,47 @@ function setBabyProfile() {
     $app->response()->header("Content-Type", "application/json");
     echo json_encode($response);
 
+}
+
+function getFeeds($user_id)
+{
+    global $app, $db, $response;
+    $feed = array();
+    $sql = "select DATEDIFF(CURDATE(),dob) as day from babies where user_id=$user_id";
+
+    try{
+        $stmt   = $db->query($sql);
+        $days  = $stmt->fetchAll(PDO::FETCH_NAMED);
+
+        if(is_array($days) && count($days) > 0)
+        {
+            $day = $days[0]['day'];
+            $sql = "select * from feeds where $day between `from` and `to`";
+            $stmt   = $db->query($sql);
+            $feed  = $stmt->fetchAll(PDO::FETCH_NAMED);
+
+        }
+        else
+        {
+            $response["header"]["error"] = "1";
+            $response["header"]["message"] = "Add your baby profile first";
+        }
+
+        $response["body"] = $feed;
+        $response["header"]["error"] = "0";
+        $response["header"]["message"] = "Success";
+
+    }
+    catch(PDOException $e)
+    {
+        $response["header"]["error"] = "1";
+        $response["header"]["message"] = $e->getMessage();
+    }
+
+
+
+    $app->response()->header("Content-Type", "application/json");
+    echo json_encode($response);
 }
 
 function updateBabyGrowth() {

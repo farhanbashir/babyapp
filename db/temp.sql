@@ -32,7 +32,7 @@ CREATE TABLE `babies` (
 
 /*Data for the table `babies` */
 
-insert  into `babies`(`baby_id`,`user_id`,`first_name`,`image`,`dob`,`weight`,`height`) values (2,1,'bbbb','','1999-09-01',12.00,8207.00);
+insert  into `babies`(`baby_id`,`user_id`,`first_name`,`image`,`dob`,`weight`,`height`) values (2,1,'bbbb','','2015-01-01',12.00,8207.00);
 
 /*Table structure for table `devices` */
 
@@ -44,11 +44,27 @@ CREATE TABLE `devices` (
   `uid` varchar(255) DEFAULT NULL,
   `type` tinyint(1) DEFAULT NULL COMMENT '0=iphone,1=android',
   PRIMARY KEY (`device_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
 
 /*Data for the table `devices` */
 
-insert  into `devices`(`device_id`,`user_id`,`uid`,`type`) values (4,1,'asfadsfs',0);
+insert  into `devices`(`device_id`,`user_id`,`uid`,`type`) values (4,1,'asfadsfs',0),(5,1,'asfadsfs',0),(6,1,NULL,NULL),(7,1,NULL,NULL),(8,1,NULL,NULL),(9,1,NULL,NULL),(10,1,NULL,NULL),(11,1,NULL,NULL),(12,1,NULL,NULL),(13,1,NULL,NULL),(14,1,NULL,NULL);
+
+/*Table structure for table `feeds` */
+
+DROP TABLE IF EXISTS `feeds`;
+
+CREATE TABLE `feeds` (
+  `feed_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `from` int(5) DEFAULT NULL,
+  `to` int(5) DEFAULT NULL,
+  `feed` text,
+  PRIMARY KEY (`feed_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+/*Data for the table `feeds` */
+
+insert  into `feeds`(`feed_id`,`from`,`to`,`feed`) values (1,90,92,'asdf as  fas fadsf d f');
 
 /*Table structure for table `growth` */
 
