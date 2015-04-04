@@ -28,6 +28,7 @@ $app->get("/verify/:email/:code",'verify');
 
 $app->post('/signup','signup');
 $app->post('/setBabyProfile','setBabyProfile');
+$app->post('/editBabyProfile','editBabyProfile');
 $app->post("/login",'login');
 $app->post('/updatePassword','updatePassword');
 $app->post('/imgSave','imgSave');
@@ -703,6 +704,97 @@ function setBabyProfile() {
     echo json_encode($response);
 
 }
+
+function editBabyProfile() {
+    global $app, $db, $response;
+
+    $req = $app->request(); // Getting parameter with names
+    $first_name = $req->params('first_name'); // Getting parameter with names
+    $user_id = $req->params('user_id'); // Getting parameter with names
+    $baby_id = $req->params('baby_id'); // Getting parameter with names
+    $weight = $req->params('weight'); // Getting parameter with names
+    $height = md5($req->params('height')); // Getting parameter with names
+    $dob= $req->params('dob');
+    $gender= $req->params('gender');
+    $user_image = '';
+
+    if(!babyAvailable($user_id))
+    {
+        if(isset($_FILES['file']))
+        {
+            $uploaddir = 'images/';
+            $file = basename($_FILES['file']['name']);
+            $protocol = stripos($_SERVER['SERVER_PROTOCOL'],'https') === true ? 'https://' : 'http://';
+
+            $uploadfile = $uploaddir . $file;
+
+            if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadfile)) {
+                $user_image = $uploadfile;
+                $path = substr($_SERVER['REQUEST_URI'],0,stripos($_SERVER['REQUEST_URI'], "index.php"));
+                $user_image = $protocol.$_SERVER['SERVER_NAME'].$path.$user_image;
+            } else {
+                $response["header"]["error"] = "1";
+                $response["header"]["message"] = 'Some error';
+            }
+        }
+
+        if(count($response) == 0)
+        {
+            if($user_image){
+         $userImageText = " ,image=:user_image ";
+         }else{
+           $userImageText = "";
+       }
+        $sql = "UPDATE babies SET
+               first_name=:first_name,
+               weight=:weight,
+               height=:height,
+               dob=:dob,
+               gender=:gender
+               ".$userImageText."
+               WHERE user_id=:user_id AND baby_id=:baby_id";
+
+            try{
+                $stmt = $db->prepare($sql);
+                $stmt->bindParam(":user_id", $user_id);
+                $stmt->bindParam(":baby_id", $baby_id);
+                $stmt->bindParam(":first_name", $first_name);
+                $stmt->bindParam(":dob", $dob);
+                $stmt->bindParam(":weight", $weight);
+                $stmt->bindParam(":height", $height);
+                $stmt->bindParam(":gender", $gender);
+                if($user_image)
+                {
+                    $stmt->bindParam(":image", $user_image);
+                }
+
+                $stmt->execute();
+
+                //$user["baby_id"] = $db->lastInsertId();
+                //$response["body"] = $user;
+                $response["header"]["error"] = "0";
+                $response["header"]["message"] = "Success";
+
+            }
+            catch(PDOException $e)
+            {
+                $response["header"]["error"] = "1";
+                $response["header"]["message"] = $e->getMessage();
+            }
+        }
+    }
+    else
+    {
+        $response["header"]["error"] = "1";
+        $response["header"]["message"] = 'You do not have any baby profile configured';
+    }
+
+
+    $app->response()->header("Content-Type", "application/json");
+    echo json_encode($response);
+
+}
+
 
 function getFeeds($user_id)
 {
