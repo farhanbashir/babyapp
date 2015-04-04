@@ -810,7 +810,7 @@ function getFeeds($user_id)
         if(is_array($days) && count($days) > 0)
         {
             $day = $days[0]['day'];
-            $sql = "select * from feeds ";//where $day between `from` and `to`
+            $sql = "select * from feeds where $day between `from` and `to`";
             $stmt   = $db->query($sql);
             $feed  = $stmt->fetchAll(PDO::FETCH_NAMED);
 
