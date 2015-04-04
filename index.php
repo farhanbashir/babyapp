@@ -7,7 +7,8 @@ require "functions.php";
 
 //require "NotORM.php";
 
-$db = new PDO("mysql:host=".$config["db"]["db_host"].";dbname=".$config["db"]["db_name"], $config["db"]["db_user"], $config["db"]["db_password"]);
+$db = new PDO("mysql:host=".$config["db"]["db_host"].";dbname=".$config["db"]["db_name"], $config["db"]["db_user"], $config["db"]["db_password"],array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"));
+//$db->set_charset(‘utf8′);
 //$db = new NotORM($pdo);
 
 require 'Slim/Slim.php';
@@ -809,7 +810,7 @@ function getFeeds($user_id)
         if(is_array($days) && count($days) > 0)
         {
             $day = $days[0]['day'];
-            $sql = "select * from feeds where $day between `from` and `to`";
+            $sql = "select * from feeds ";//where $day between `from` and `to`
             $stmt   = $db->query($sql);
             $feed  = $stmt->fetchAll(PDO::FETCH_NAMED);
 
