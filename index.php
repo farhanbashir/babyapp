@@ -800,7 +800,7 @@ function getFeeds($user_id)
 {
     global $app, $db, $response;
     $feed = array();
-    $sql = "select DATEDIFF(CURDATE(),dob) as day from babies where user_id=$user_id";
+    $sql = "select floor(DATEDIFF(CURDATE(),dob)/30) as day from babies where user_id=$user_id";
 
     try{
         $stmt   = $db->query($sql);
