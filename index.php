@@ -639,13 +639,14 @@ function setBabyProfile() {
     $weight = $req->params('weight'); // Getting parameter with names
     $height = md5($req->params('height')); // Getting parameter with names
     $dob= $req->params('dob');
+    $gender= $req->params('gender');
     $user_image = '';
 
     if(babyAvailable($user_id))
     {
-        $sql = "INSERT INTO babies (user_id,first_name,image,dob,weight,height)
+        $sql = "INSERT INTO babies (user_id,first_name,image,dob,weight,height,gender)
         values
-        (:user_id,:first_name,:image,:dob,:weight,:height)";
+        (:user_id,:first_name,:image,:dob,:weight,:height,:gender)";
 
         if(isset($_FILES['file']))
         {
@@ -674,6 +675,7 @@ function setBabyProfile() {
                 $stmt->bindParam(":dob", $dob);
                 $stmt->bindParam(":weight", $weight);
                 $stmt->bindParam(":height", $height);
+                $stmt->bindParam(":gender", $gender);
                 $stmt->bindParam(":image", $user_image);
                 $stmt->execute();
 
