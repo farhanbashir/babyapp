@@ -36,6 +36,7 @@ $app->post('/imgSave','imgSave');
 $app->post('/editProfile','editProfile');
 $app->post('/updateBabyGrowth','updateBabyGrowth');
 $app->post("/getBabyGrowth",'getBabyGrowth');
+$app->post("/getGrowthTracker",'getGrowthTracker');
 $app->post('/forgotPassword','forgotPassword');
 
 function test1()
@@ -742,7 +743,7 @@ function editBabyProfile() {
         if(count($response) == 0)
         {
             if($user_image){
-         $userImageText = " ,image=:user_image ";
+         $userImageText = " ,image='$user_image' ";
          }else{
            $userImageText = "";
        }
@@ -764,10 +765,10 @@ function editBabyProfile() {
                 $stmt->bindParam(":weight", $weight);
                 $stmt->bindParam(":height", $height);
                 $stmt->bindParam(":gender", $gender);
-                if($user_image)
-                {
-                    $stmt->bindParam(":image", $user_image);
-                }
+                // if($user_image)
+                // {
+                //     $stmt->bindParam(":baby_image", $user_image);
+                // }
 
                 $stmt->execute();
 
@@ -819,6 +820,52 @@ function getFeeds($user_id)
         {
             $response["header"]["error"] = "1";
             $response["header"]["message"] = "Add your baby profile first";
+        }
+
+        $response["body"] = $feed;
+        $response["header"]["error"] = "0";
+        $response["header"]["message"] = "Success";
+
+    }
+    catch(PDOException $e)
+    {
+        $response["header"]["error"] = "1";
+        $response["header"]["message"] = $e->getMessage();
+    }
+
+
+
+    $app->response()->header("Content-Type", "application/json");
+    echo json_encode($response);
+}
+
+function getGrowthTracker()
+{
+    global $app, $db, $response;
+    $req = $app->request(); // Getting parameter with names
+    $baby_id = $req->params('baby_id'); // Getting parameter with names
+    $user_id = $req->params('user_id'); // Getting parameter with names
+    $type = $req->params('type'); // Getting parameter with names
+    $feed = array();
+    $sql = "select floor(DATEDIFF(CURDATE(),dob)/30) as month,gender as g from babies where user_id=$user_id";
+
+    try{
+        $stmt   = $db->query($sql);
+        $month  = $stmt->fetchAll(PDO::FETCH_NAMED);
+
+        if(is_array($month) && count($month) > 0)
+        {
+            $m = $month[0]['month'];
+            $g = $month[0]['g'];
+            $sql = "select * from tracks where age  between $m-5 and $m+5 and gender=$g and type=$type limit 10";
+            $stmt   = $db->query($sql);
+            $feed  = $stmt->fetchAll(PDO::FETCH_NAMED);
+
+        }
+        else
+        {
+            $response["header"]["error"] = "1";
+            $response["header"]["message"] = "No Data";
         }
 
         $response["body"] = $feed;
