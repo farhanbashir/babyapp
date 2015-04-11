@@ -640,7 +640,7 @@ function setBabyProfile() {
     $first_name = $req->params('first_name'); // Getting parameter with names
     $user_id = $req->params('user_id'); // Getting parameter with names
     $weight = $req->params('weight'); // Getting parameter with names
-    $height = md5($req->params('height')); // Getting parameter with names
+    $height = $req->params('height'); // Getting parameter with names
     $dob= $req->params('dob');
     $gender= $req->params('gender');
     $user_image = '';
