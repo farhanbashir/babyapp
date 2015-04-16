@@ -21,6 +21,8 @@ $app = new \Slim\Slim(array("MODE" => "development"));
 $response = array();
 
 $app->get('/users','getUsers');
+$app->get('/getMilestones','getMilestones');
+$app->get('/getMilestoneImages/:baby_id/:milestone_id','getMilestoneImages');
 $app->get('/getBabyProfile/:user_id','getBabyProfile');
 $app->get("/getProfile/:params+",'getProfile');
 $app->get("/getFeeds/:user_id",'getFeeds');
@@ -32,16 +34,18 @@ $app->post('/setBabyProfile','setBabyProfile');
 $app->post('/editBabyProfile','editBabyProfile');
 $app->post("/login",'login');
 $app->post('/updatePassword','updatePassword');
+$app->post('/updatePhotoInMilestone','updatePhotoInMilestone');
 $app->post('/imgSave','imgSave');
 $app->post('/editProfile','editProfile');
+$app->post('/askExpert','askExpert');
 $app->post('/updateBabyGrowth','updateBabyGrowth');
 $app->post("/getBabyGrowth",'getBabyGrowth');
 $app->post("/getGrowthTracker",'getGrowthTracker');
 $app->post('/forgotPassword','forgotPassword');
 
 function test1()
-{
-    debug('here',1);
+{createBabyFolders(1);
+    //mkdir('images/test');
 }
 
 function get_user_device_id($user_id)
@@ -87,6 +91,63 @@ function getUsers()
 
 
 }
+
+function getMilestones()
+{
+    global $app ,$db, $response;
+    $milestones = array();
+
+    $sql = "SELECT milestone_id,milestone_name FROM milestones";
+
+    try{
+        $stmt   = $db->query($sql);
+        $milestones  = $stmt->fetchAll(PDO::FETCH_NAMED);
+        $response["header"]["error"] = "0";
+        $response["header"]["message"] = "Success";
+    }
+    catch(PDOException $e){
+        $response["header"]["error"] = "1";
+        $response["header"]["message"] = $e->getMessage();
+    }
+
+
+
+    $response["body"] = $milestones;
+
+    $app->response()->header("Content-Type", "application/json");
+    echo json_encode($response);
+
+
+}
+
+function getMilestoneImages($baby_id,$milestone_id)
+{
+    global $app ,$db, $response;
+    $milestones = array();
+
+    $sql = "SELECT * FROM baby_milestones where baby_id=$baby_id and milestone_id=$milestone_id";
+
+    try{
+        $stmt   = $db->query($sql);
+        $milestones  = $stmt->fetchAll(PDO::FETCH_NAMED);
+        $response["header"]["error"] = "0";
+        $response["header"]["message"] = "Success";
+    }
+    catch(PDOException $e){
+        $response["header"]["error"] = "1";
+        $response["header"]["message"] = $e->getMessage();
+    }
+
+
+
+    $response["body"] = $milestones;
+
+    $app->response()->header("Content-Type", "application/json");
+    echo json_encode($response);
+
+
+}
+
 
 function getBabyProfile($user_id)
 {
@@ -707,6 +768,123 @@ function setBabyProfile() {
 
 }
 
+function updatePhotoInMilestone() {
+    global $app, $db, $response;
+
+    $req = $app->request(); // Getting parameter with names
+    $baby_id = $req->params('baby_id'); // Getting parameter with names
+    $milestone_id= $req->params('milestone_id');
+    $date= $req->params('date');
+    $caption= $req->params('caption');
+    $image = '';
+
+    $sql = "INSERT INTO baby_milestones (baby_id,date,milestone_id,caption,image)
+    values
+    (:baby_id,:date,:milestone_id,:caption,:image)";
+
+    if(isset($_FILES['file']))
+    {
+        $uploaddir = "images/$baby_id/$milestone_id/";
+        $file = basename($_FILES['file']['name']);
+        $protocol = stripos($_SERVER['SERVER_PROTOCOL'],'https') === true ? 'https://' : 'http://';
+
+        $uploadfile = $uploaddir . $file;
+
+        if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadfile)) {
+            $user_image = $uploadfile;
+            $path = substr($_SERVER['REQUEST_URI'],0,stripos($_SERVER['REQUEST_URI'], "index.php"));
+            $user_image = $protocol.$_SERVER['SERVER_NAME'].$path.$user_image;
+        } else {
+            $response["header"]["error"] = "1";
+            $response["header"]["message"] = 'Some error';
+        }
+    }
+
+    if(count($response) == 0)
+    {
+        try{
+            $stmt = $db->prepare($sql);
+            $stmt->bindParam(":baby_id", $baby_id);
+            $stmt->bindParam(":date", $date);
+            $stmt->bindParam(":milestone_id", $milestone_id);
+            $stmt->bindParam(":caption", $caption);
+            $stmt->bindParam(":image", $user_image);
+            $stmt->execute();
+
+            $response["header"]["error"] = "0";
+            $response["header"]["message"] = "Success";
+
+        }
+        catch(PDOException $e)
+        {
+            $response["header"]["error"] = "1";
+            $response["header"]["message"] = $e->getMessage();
+        }
+    }
+
+
+    $app->response()->header("Content-Type", "application/json");
+    echo json_encode($response);
+
+}
+
+function askExpert() {
+    global $app, $db, $response;
+
+    $req = $app->request(); // Getting parameter with names
+    $user_id = $req->params('user_id'); // Getting parameter with names
+    $baby_id = $req->params('baby_id'); // Getting parameter with names
+    $email = $req->params('email');
+    $date= date('Y-m-d');
+    $subject= $req->params('subject');
+    $message= $req->params('message');
+
+    $sql = "INSERT INTO ask_expert (user_id,baby_id,date,email,subject,message)
+    values
+    (:user_id,:baby_id,:date,:email,:subject,:message)";
+
+        try{
+            $stmt = $db->prepare($sql);
+            $stmt->bindParam(":user_id", $user_id);
+            $stmt->bindParam(":baby_id", $baby_id);
+            $stmt->bindParam(":date", $date);
+            $stmt->bindParam(":email", $email);
+            $stmt->bindParam(":subject", $subject);
+            $stmt->bindParam(":message", $message);
+            $stmt->execute();
+
+            $response["header"]["error"] = "0";
+            $response["header"]["message"] = "Success";
+
+        }
+        catch(PDOException $e)
+        {
+            $response["header"]["error"] = "1";
+            $response["header"]["message"] = $e->getMessage();
+        }
+
+
+    $app->response()->header("Content-Type", "application/json");
+    echo json_encode($response);
+
+}
+
+
+function createBabyFolders($baby_id)
+{
+    global $db;
+    $milestones = array();
+    mkdir("images/$baby_id");
+    $sql = "select * from milestones";
+    $stmt   = $db->query($sql);
+    $milestones  = $stmt->fetchAll(PDO::FETCH_NAMED);
+
+    foreach($milestones as $milestone)
+    {
+        mkdir("images/$baby_id/".$milestone['milestone_id']);
+    }
+}
+
 function editBabyProfile() {
     global $app, $db, $response;
 
@@ -912,6 +1090,7 @@ function updateBabyGrowth() {
         $stmt->execute();
 
         $user["growth_id"] = $db->lastInsertId();
+        updateBabyProfile($user_id,$baby_id,$weight,$height,$date);
         $response["body"] = array();
         $response["header"]["error"] = "0";
         $response["header"]["message"] = "Success";
@@ -927,6 +1106,31 @@ function updateBabyGrowth() {
 
     $app->response()->header("Content-Type", "application/json");
     echo json_encode($response);
+
+}
+
+function updateBabyProfile($user_id,$baby_id,$weight,$height)
+{
+    global $db;
+
+
+    $sql = "UPDATE babies set weight=:weight,height=:height where user_id=:user_id and baby_id=:baby_id";
+
+
+    try{
+        $stmt = $db->prepare($sql);
+        $stmt->bindParam(":user_id", $user_id);
+        $stmt->bindParam(":baby_id", $baby_id);
+        $stmt->bindParam(":weight", $weight);
+        $stmt->bindParam(":height", $height);
+        $stmt->execute();
+
+
+    }
+    catch(PDOException $e)
+    {
+
+    }
 
 }
 

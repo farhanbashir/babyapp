@@ -15,6 +15,39 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/`babyapp` /*!40100 DEFAULT CHARACTER SET
 
 USE `babyapp`;
 
+/*Table structure for table `album_images` */
+
+DROP TABLE IF EXISTS `album_images`;
+
+CREATE TABLE `album_images` (
+  `album_image_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `baby_id` int(11) DEFAULT NULL,
+  `milestone_id` int(11) DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`album_image_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+/*Data for the table `album_images` */
+
+/*Table structure for table `ask_expert` */
+
+DROP TABLE IF EXISTS `ask_expert`;
+
+CREATE TABLE `ask_expert` (
+  `ask_expert_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `baby_id` int(11) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `subject` varchar(255) DEFAULT NULL,
+  `message` text,
+  `date` date DEFAULT NULL,
+  PRIMARY KEY (`ask_expert_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+/*Data for the table `ask_expert` */
+
+insert  into `ask_expert`(`ask_expert_id`,`user_id`,`baby_id`,`email`,`subject`,`message`,`date`) values (1,2,1,'farhan.bashir@gmail.com','test subject','hello how are you','2015-04-17');
+
 /*Table structure for table `babies` */
 
 DROP TABLE IF EXISTS `babies`;
@@ -33,7 +66,25 @@ CREATE TABLE `babies` (
 
 /*Data for the table `babies` */
 
-insert  into `babies`(`baby_id`,`user_id`,`first_name`,`image`,`dob`,`weight`,`height`,`gender`) values (2,1,'aa','http://localhost/babyapp/images/ami.jpg','2015-01-01',12.00,2.10,1);
+insert  into `babies`(`baby_id`,`user_id`,`first_name`,`image`,`dob`,`weight`,`height`,`gender`) values (2,1,'aa','http://localhost/babyapp/images/ami.jpg','2015-01-01',16.00,2.14,1);
+
+/*Table structure for table `baby_milestones` */
+
+DROP TABLE IF EXISTS `baby_milestones`;
+
+CREATE TABLE `baby_milestones` (
+  `baby_milestone_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `baby_id` int(11) DEFAULT NULL,
+  `date` date DEFAULT NULL,
+  `milestone_id` int(11) DEFAULT NULL,
+  `caption` varchar(255) DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`baby_milestone_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+
+/*Data for the table `baby_milestones` */
+
+insert  into `baby_milestones`(`baby_milestone_id`,`baby_id`,`date`,`milestone_id`,`caption`,`image`) values (1,1,'2015-04-12',2,'this is test image',NULL),(2,1,'2015-04-12',2,'this is test image','http://localhost/babyapp/images/1/2/beaf.jpg');
 
 /*Table structure for table `devices` */
 
@@ -80,11 +131,26 @@ CREATE TABLE `growth` (
   `weight` float(10,2) DEFAULT NULL,
   `height` float(10,2) DEFAULT NULL,
   PRIMARY KEY (`growth_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=latin1;
 
 /*Data for the table `growth` */
 
-insert  into `growth`(`growth_id`,`user_id`,`baby_id`,`date`,`weight`,`height`) values (15,1,2,'2015-03-21',12.25,109.12),(16,1,2,'2015-03-23',12.25,999.99),(17,1,2,'2015-03-23',12.25,1090.12),(18,1,2,'2015-03-23',12.25,109000.12);
+insert  into `growth`(`growth_id`,`user_id`,`baby_id`,`date`,`weight`,`height`) values (15,1,2,'2015-03-21',12.25,109.12),(16,1,2,'2015-03-23',12.25,999.99),(17,1,2,'2015-03-23',12.25,1090.12),(18,1,2,'2015-03-23',12.25,109000.12),(19,2,2,'2015-04-12',12.00,2.10),(20,1,2,'2015-04-12',12.00,2.10),(21,1,2,'2015-04-12',12.21,2.10),(22,1,2,'2015-04-12',12.00,2.10),(23,1,2,'2015-04-12',12.00,2.14),(24,1,2,'2015-04-12',12.00,2.14),(25,1,2,'2015-04-12',16.00,2.14);
+
+/*Table structure for table `milestones` */
+
+DROP TABLE IF EXISTS `milestones`;
+
+CREATE TABLE `milestones` (
+  `milestone_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `milestone_name` varchar(255) DEFAULT NULL,
+  `milestone_description` text,
+  PRIMARY KEY (`milestone_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+
+/*Data for the table `milestones` */
+
+insert  into `milestones`(`milestone_id`,`milestone_name`,`milestone_description`) values (1,'First step',NULL),(2,'First birthday',NULL),(3,'First bike ride',NULL),(4,'First book',NULL),(5,'First use of spoon and fork',NULL),(6,'First potty training',NULL),(7,'First drawing',NULL),(8,'First brush of teeth',NULL),(9,'First friend',NULL),(10,'First swim',NULL);
 
 /*Table structure for table `tracks` */
 
