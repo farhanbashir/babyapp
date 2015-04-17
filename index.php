@@ -42,6 +42,7 @@ $app->post('/updateBabyGrowth','updateBabyGrowth');
 $app->post("/getBabyGrowth",'getBabyGrowth');
 $app->post("/getGrowthTracker",'getGrowthTracker');
 $app->post('/forgotPassword','forgotPassword');
+$app->post('/setAlbumImage','setAlbumImage');
 
 function test1()
 {createBabyFolders(1);
@@ -828,6 +829,80 @@ function updatePhotoInMilestone() {
 
 }
 
+function setAlbumImage() {
+    global $app, $db, $response;
+
+    $req = $app->request(); // Getting parameter with names
+    $baby_id = $req->params('baby_id'); // Getting parameter with names
+    $milestone_id= $req->params('milestone_id');
+    $image = '';
+
+    if(isset($_FILES['file']))
+    {
+        $uploaddir = "images/$baby_id/$milestone_id/";
+        $file = basename($_FILES['file']['name']);
+        $protocol = stripos($_SERVER['SERVER_PROTOCOL'],'https') === true ? 'https://' : 'http://';
+
+        $uploadfile = $uploaddir . $file;
+
+        if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadfile)) {
+            $user_image = $uploadfile;
+            $path = substr($_SERVER['REQUEST_URI'],0,stripos($_SERVER['REQUEST_URI'], "index.php"));
+            $user_image = $protocol.$_SERVER['SERVER_NAME'].$path.$user_image;
+        } else {
+            $response["header"]["error"] = "1";
+            $response["header"]["message"] = 'Some error';
+        }
+    }
+
+    $sql = "select count(*) from album_images where baby_id=:baby_id and milestone_id=:milestone_id";
+
+    $stmt = $db->prepare($sql);
+    $stmt->bindParam(":baby_id", $baby_id);
+    $stmt->bindParam(":milestone_id", $milestone_id);
+    $stmt->execute();
+
+    $present = $stmt->fetchColumn();
+
+
+
+    if($present != false)
+    {
+        //update
+        $sql = "update album_images set image=:image where baby_id=:baby_id and milestone_id=:milestone_id";
+    }
+    else
+    {
+        //insert
+        $sql = "insert into album_images (baby_id,milestone_id,image) values (:baby_id,:milestone_id,:image)";
+    }
+
+    if(count($response) == 0)
+    {
+        try{
+            $stmt = $db->prepare($sql);
+            $stmt->bindParam(":baby_id", $baby_id);
+            $stmt->bindParam(":milestone_id", $milestone_id);
+            $stmt->bindParam(":image", $user_image);
+            $stmt->execute();
+
+            $response["header"]["error"] = "0";
+            $response["header"]["message"] = "Success";
+
+        }
+        catch(PDOException $e)
+        {
+            $response["header"]["error"] = "1";
+            $response["header"]["message"] = $e->getMessage();
+        }
+    }
+
+
+    $app->response()->header("Content-Type", "application/json");
+    echo json_encode($response);
+
+}
+
 function askExpert() {
     global $app, $db, $response;
 
@@ -852,6 +927,8 @@ function askExpert() {
             $stmt->bindParam(":subject", $subject);
             $stmt->bindParam(":message", $message);
             $stmt->execute();
+
+            sendEmail(array("from"=>$email,"subject"=>$subject,"message"=>$message));
 
             $response["header"]["error"] = "0";
             $response["header"]["message"] = "Success";
@@ -1457,10 +1534,11 @@ function updatePassword()
 
 function sendEmail($data)
 {
-    $to = $data['to'];
-    $subject = $data['subject'];
+    $to = "wasifiqbal90@gmail.com";
+    $from = $data["from"];
+    $subject = "DADONE - ASK EXPERT ".$data['subject'];
     $message = $data['message'];
-    $headers = "From: support@danone.com" . "\r\n";
+    $headers = "From: $from" . "\r\n";
 
     mail($to, $subject, $message,$headers);
 }
