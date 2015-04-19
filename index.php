@@ -745,6 +745,7 @@ function setBabyProfile() {
                 $stmt->execute();
 
                 $user["baby_id"] = $db->lastInsertId();
+                createBabyFolders($user["baby_id"]);
                 $response["body"] = $user;
                 $response["header"]["error"] = "0";
                 $response["header"]["message"] = "Success";
