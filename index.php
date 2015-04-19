@@ -21,7 +21,7 @@ $app = new \Slim\Slim(array("MODE" => "development"));
 $response = array();
 
 $app->get('/users','getUsers');
-$app->get('/getMilestones','getMilestones');
+$app->get('/getMilestones/:user_id','getMilestones');
 $app->get('/getMilestoneImages/:baby_id/:milestone_id','getMilestoneImages');
 $app->get('/getBabyProfile/:user_id','getBabyProfile');
 $app->get("/getProfile/:params+",'getProfile');
@@ -94,12 +94,17 @@ function getUsers()
 
 }
 
-function getMilestones()
+function getMilestones($baby_id)
 {
     global $app ,$db, $response;
     $milestones = array();
 
-    $sql = "SELECT milestone_id,milestone_name FROM milestones";
+    //$sql = "SELECT milestone_id,milestone_name FROM milestones";
+    $sql =  "SELECT m.milestone_id,m.milestone_name,
+            (select image from album_images where baby_id=$baby_id and milestone_id=m.milestone_id limit 1) as album_cover,
+            (select image from baby_milestones where baby_id=$baby_id and milestone_id=m.milestone_id order by baby_milestone_id desc limit 1) as last_image
+            FROM milestones m
+            ";
 
     try{
         $stmt   = $db->query($sql);
