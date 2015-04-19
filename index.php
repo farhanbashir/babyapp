@@ -45,8 +45,9 @@ $app->post('/forgotPassword','forgotPassword');
 $app->post('/setAlbumImage','setAlbumImage');
 
 function test1()
-{createBabyFolders(1);
-    //mkdir('images/test');
+{
+    checkFolder(10);
+    //debug(file_exists("images/2"));
 }
 
 function get_user_device_id($user_id)
@@ -456,6 +457,27 @@ function getProfile($params){
 
 }
 
+function checkBabyFolder($user_id)
+{
+    global $db;
+
+    $sql = "select * from babies where user_id=:user_id";
+    $stmt = $db->prepare($sql);
+    $stmt->bindParam("user_id", $user_id);
+    $stmt->execute();
+    //$stmt   = $db->query($sql);
+    $data  = $stmt->fetch(PDO::FETCH_NAMED);
+
+    if(is_array($data) && count($data))
+    {
+        $baby_id = $data['baby_id'];
+        if(!file_exists("images/$baby_id"))
+        {
+            createBabyFolders($baby_id);
+        }
+    }
+}
+
 function login(){
     global $app, $db, $response;
 
@@ -486,12 +508,14 @@ function login(){
         {
             if($data["password"] == MD5($password))// && $data['verified'] == 1
             {
+                checkBabyFolder($data['user_id']);
+
                 if($device_id != "" && $device_type != "")
                 {
                     $sql = "select count(*) from devices where user_id=:user_id and type=:device_type";
 
                     $stmt = $db->prepare($sql);
-                    $stmt->bindParam(":user_id", $data['id']);
+                    $stmt->bindParam(":user_id", $data['user_id']);
                     $stmt->bindParam(":device_type", $device_type);
                     $stmt->execute();
 
@@ -507,7 +531,7 @@ function login(){
 
                         $stmt = $db->prepare($sql);
 
-                        $stmt->bindParam(":user_id", $data['id']);
+                        $stmt->bindParam(":user_id", $data['user_id']);
                         $stmt->bindParam(":device_type", $device_type);
 
                         $stmt->execute();
@@ -952,15 +976,19 @@ function createBabyFolders($baby_id)
 {
     global $db;
     $milestones = array();
-    mkdir("images/$baby_id");
-    $sql = "select * from milestones";
-    $stmt   = $db->query($sql);
-    $milestones  = $stmt->fetchAll(PDO::FETCH_NAMED);
-
-    foreach($milestones as $milestone)
+    if(!file_exists("images/$baby_id"))
     {
-        mkdir("images/$baby_id/".$milestone['milestone_id']);
+        mkdir("images/$baby_id");
+        $sql = "select * from milestones";
+        $stmt   = $db->query($sql);
+        $milestones  = $stmt->fetchAll(PDO::FETCH_NAMED);
+
+        foreach($milestones as $milestone)
+        {
+            mkdir("images/$baby_id/".$milestone['milestone_id']);
+        }
     }
+
 }
 
 function editBabyProfile() {
