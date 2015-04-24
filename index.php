@@ -1100,7 +1100,7 @@ function getFeeds($user_id)
         if(is_array($days) && count($days) > 0)
         {
             $day = $days[0]['day'];
-            $sql = "select * from feeds where $day between `from` and `to`";
+            $sql = "select f.feed_id,f.from,f.to,f.feed,f.intro,f.milestone_id,m.milestone_name from feeds f left join milestones m on f.milestone_id = m.milestone_id where $day between `from` and `to`";
             $stmt   = $db->query($sql);
             $feed  = $stmt->fetchAll(PDO::FETCH_NAMED);
 
@@ -1174,6 +1174,105 @@ function getGrowthTracker()
     echo json_encode($response);
 }
 
+
+function getGrowthTrackers($user_id,$weight,$height,$date)
+{
+	global $db;
+    //global $app, $db, $response;
+    //$req = $app->request(); // Getting parameter with names
+    
+    $feed = array();
+    
+    $sql = "select floor(DATEDIFF('".$date."',dob)/30) as month,gender as g from babies where user_id=$user_id";
+
+    try{
+        $stmt   = $db->query($sql);
+        $month  = $stmt->fetchAll(PDO::FETCH_NAMED);
+
+        if(is_array($month) && count($month) > 0)
+        {
+            $m = $month[0]['month'];
+            $g = $month[0]['g'];
+            $sql = "select * from tracks where age  between $m-1 and $m+1 and gender=$g";
+            $stmt   = $db->query($sql);
+            $feed  = $stmt->fetchAll(PDO::FETCH_NAMED);
+			$messageHeight = "";
+			$messageWeight = "";
+
+			$genderText = $g==0?"his":"her";	
+
+			foreach ($feed as $feedItem){
+			
+				// Length
+				if($feedItem['type']==1){
+					
+					// BELOW AVERAGE PERCENTILE
+					if($height <= $feedItem['p25']){
+
+						$messageHeight = "is smaller than some children ".$genderText." age.";
+						
+					}
+					
+					if($height >= $feedItem['p25'] && $height <= $feedItem['p75']){
+					
+						$messageHeight = "is similar to most other children ".$genderText." age.";
+
+					}
+
+					if($height >= $feedItem['p75']){
+					
+						$messageHeight = "is bigger than some other children ".$genderText." age.";
+	
+					}
+	
+				}
+
+				// Width
+				
+				if($feedItem['type']==2){
+				
+					// BELOW AVERAGE PERCENTILE
+					if($height <= $feedItem['p25']){
+
+						$messageWeight = "is smaller than some children ".$genderText." age.";
+						
+					}
+					
+					if($height >= $feedItem['p25'] && $height <= $feedItem['p75']){
+					
+						$messageWeight = "is similar to most other children ".$genderText." age.";
+
+					}
+
+					if($height >= $feedItem['p75']){
+					
+						$messageWeight = "is bigger than some other children ".$genderText." age.";
+	
+					}
+				
+				}
+			}
+    
+
+        }
+		$arr = array();
+		$arr['weight']=$messageWeight;
+		$arr['height']=$messageHeight;
+
+		return $arr;
+    }
+    catch(PDOException $e)
+    {
+        $response["header"]["error"] = "1";
+        $response["header"]["message"] = $e->getMessage();
+    }
+
+
+
+    $app->response()->header("Content-Type", "application/json");
+    echo json_encode($response);
+}
+
 function updateBabyGrowth() {
     global $app, $db, $response;
     $user = array();
@@ -1201,8 +1300,12 @@ function updateBabyGrowth() {
         $stmt->execute();
 
         $user["growth_id"] = $db->lastInsertId();
+        
         updateBabyProfile($user_id,$baby_id,$weight,$height,$date);
-        $response["body"] = array();
+        
+        $message = getGrowthTrackers($user_id,$weight,$height,$date);
+        
+        $response["body"] = $message;
         $response["header"]["error"] = "0";
         $response["header"]["message"] = "Success";
 
@@ -1219,6 +1322,7 @@ function updateBabyGrowth() {
     echo json_encode($response);
 
 }
+
 
 function updateBabyProfile($user_id,$baby_id,$weight,$height)
 {
@@ -1568,7 +1672,7 @@ function updatePassword()
 
 function sendEmail($data)
 {
-    $to = "wasifiqbal90@gmail.com";
+    $to = "shoaib.hafeez@createmedia-group.com";
     $from = $data["from"];
     $subject = "DADONE - ASK EXPERT ".$data['subject'];
     $message = $data['message'];
