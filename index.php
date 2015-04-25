@@ -1146,7 +1146,7 @@ function getGrowthTracker()
         {
             $m = $month[0]['month'];
             $g = $month[0]['g'];
-            $sql = "select * from tracks where age  between $m-5 and $m+5 and gender=$g and type=$type limit 10";
+            $sql = "select * from tracks where gender=$g and type=$type";//age  between $m-5 and $m+5 and limit 10
             $stmt   = $db->query($sql);
             $feed  = $stmt->fetchAll(PDO::FETCH_NAMED);
 
@@ -1180,9 +1180,9 @@ function getGrowthTrackers($user_id,$weight,$height,$date)
 	global $db;
     //global $app, $db, $response;
     //$req = $app->request(); // Getting parameter with names
-    
+
     $feed = array();
-    
+
     $sql = "select floor(DATEDIFF('".$date."',dob)/30) as month,gender as g from babies where user_id=$user_id";
 
     try{
@@ -1199,60 +1199,60 @@ function getGrowthTrackers($user_id,$weight,$height,$date)
 			$messageHeight = "";
 			$messageWeight = "";
 
-			$genderText = $g==0?"his":"her";	
+			$genderText = $g==0?"his":"her";
 
 			foreach ($feed as $feedItem){
-			
+
 				// Length
 				if($feedItem['type']==1){
-					
+
 					// BELOW AVERAGE PERCENTILE
 					if($height <= $feedItem['p25']){
 
 						$messageHeight = "is smaller than some children ".$genderText." age.";
-						
+
 					}
-					
+
 					if($height >= $feedItem['p25'] && $height <= $feedItem['p75']){
-					
+
 						$messageHeight = "is similar to most other children ".$genderText." age.";
 
 					}
 
 					if($height >= $feedItem['p75']){
-					
+
 						$messageHeight = "is bigger than some other children ".$genderText." age.";
-	
+
 					}
-	
+
 				}
 
 				// Width
-				
+
 				if($feedItem['type']==2){
-				
+
 					// BELOW AVERAGE PERCENTILE
 					if($height <= $feedItem['p25']){
 
 						$messageWeight = "is smaller than some children ".$genderText." age.";
-						
+
 					}
-					
+
 					if($height >= $feedItem['p25'] && $height <= $feedItem['p75']){
-					
+
 						$messageWeight = "is similar to most other children ".$genderText." age.";
 
 					}
 
 					if($height >= $feedItem['p75']){
-					
+
 						$messageWeight = "is bigger than some other children ".$genderText." age.";
-	
+
 					}
-				
+
 				}
 			}
-    
+
 
         }
 		$arr = array();
@@ -1300,11 +1300,11 @@ function updateBabyGrowth() {
         $stmt->execute();
 
         $user["growth_id"] = $db->lastInsertId();
-        
+
         updateBabyProfile($user_id,$baby_id,$weight,$height,$date);
-        
+
         $message = getGrowthTrackers($user_id,$weight,$height,$date);
-        
+
         $response["body"] = $message;
         $response["header"]["error"] = "0";
         $response["header"]["message"] = "Success";
