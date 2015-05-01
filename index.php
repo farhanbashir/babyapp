@@ -21,7 +21,7 @@ $app = new \Slim\Slim(array("MODE" => "development"));
 $response = array();
 
 $app->get('/users','getUsers');
-$app->get('/getMilestones/:user_id','getMilestones');
+$app->get('/getMilestones/:user_id/:cat_id','getMilestones');
 $app->get('/getMilestoneImages/:baby_id/:milestone_id','getMilestoneImages');
 $app->get('/getBabyProfile/:user_id','getBabyProfile');
 $app->get("/getProfile/:params+",'getProfile');
@@ -94,7 +94,7 @@ function getUsers()
 
 }
 
-function getMilestones($baby_id)
+function getMilestones($baby_id,$cat_id)
 {
     global $app ,$db, $response;
     $milestones = array();
@@ -103,7 +103,7 @@ function getMilestones($baby_id)
     $sql =  "SELECT m.milestone_id,m.milestone_name,
             (select image from album_images where baby_id=$baby_id and milestone_id=m.milestone_id limit 1) as album_cover,
             (select image from baby_milestones where baby_id=$baby_id and milestone_id=m.milestone_id order by baby_milestone_id desc limit 1) as last_image
-            FROM milestones m
+            FROM milestones m where cat_id=$cat_id
             ";
 
     try{
@@ -1193,7 +1193,7 @@ function getGrowthTrackers($user_id,$weight,$height,$date)
         {
             $m = $month[0]['month'];
             $g = $month[0]['g'];
-            $sql = "select * from tracks where age  between $m-1 and $m+1 and gender=$g";
+            $sql = "select * from tracks where age = $m and gender=$g";
             $stmt   = $db->query($sql);
             $feed  = $stmt->fetchAll(PDO::FETCH_NAMED);
 			$messageHeight = "";
@@ -1232,19 +1232,19 @@ function getGrowthTrackers($user_id,$weight,$height,$date)
 				if($feedItem['type']==2){
 
 					// BELOW AVERAGE PERCENTILE
-					if($height <= $feedItem['p25']){
+					if($weight <= $feedItem['p25']){
 
 						$messageWeight = "is smaller than some children ".$genderText." age.";
 
 					}
 
-					if($height >= $feedItem['p25'] && $height <= $feedItem['p75']){
+					if($weight >= $feedItem['p25'] && $weight <= $feedItem['p75']){
 
 						$messageWeight = "is similar to most other children ".$genderText." age.";
 
 					}
 
-					if($height >= $feedItem['p75']){
+					if($weight >= $feedItem['p75']){
 
 						$messageWeight = "is bigger than some other children ".$genderText." age.";
 
@@ -1283,11 +1283,25 @@ function updateBabyGrowth() {
     $weight = $req->params('weight'); // Getting parameter with names
     $height = $req->params('height'); // Getting parameter with names
     $date= $req->params('date');
+    $month = date("m",strtotime($date));
+    $year = date("Y",strtotime($date));
+
+    if(babyGrowthDataAvailable($user_id, $baby_id, $date))
+    {
+        $sql = "UPDATE growth set user_id=:user_id, baby_id=:baby_id, date=:date, height=:height, weight=:weight
+                WHERE user_id=:user_id
+                AND baby_id=:baby_id
+                AND MONTH(date)=$month
+                AND YEAR(date)=$year";
+    }
+    else
+    {
+        $sql = "INSERT INTO growth (user_id,baby_id,date,weight,height)
+                values
+                (:user_id,:baby_id,:date,:weight,:height)";
+    }
 
 
-    $sql = "INSERT INTO growth (user_id,baby_id,date,weight,height)
-    values
-    (:user_id,:baby_id,:date,:weight,:height)";
 
 
     try{
@@ -1301,7 +1315,11 @@ function updateBabyGrowth() {
 
         $user["growth_id"] = $db->lastInsertId();
 
-        updateBabyProfile($user_id,$baby_id,$weight,$height,$date);
+        if(date("m") == $month && date("Y") == $year)
+        {
+            updateBabyProfile($user_id,$baby_id,$weight,$height,$date);
+        }
+
 
         $message = getGrowthTrackers($user_id,$weight,$height,$date);
 
@@ -1351,6 +1369,7 @@ function updateBabyProfile($user_id,$baby_id,$weight,$height)
 
 function getBabyGrowth() {
     global $app, $db, $response;
+
     $user = array();
 
     $req = $app->request(); // Getting parameter with names
@@ -1358,6 +1377,8 @@ function getBabyGrowth() {
     $from_date = $req->params('from_date'); // Getting parameter with names
     $to_date = $req->params('to_date'); // Getting parameter with names
 
+	$message = array();
+	$message = getLastGrowthValueOfUser($user_id);
 
     $sql = "SELECT * FROM growth WHERE user_id=$user_id ";
 
@@ -1375,7 +1396,9 @@ function getBabyGrowth() {
         $stmt   = $db->query($sql);
         $growth  = $stmt->fetchAll(PDO::FETCH_NAMED);
 
-        $response["body"] = $growth;
+        $response["body"]['values'] = $growth;
+        $response["body"]['message'] = $message;
+
         $response["header"]["error"] = "0";
         $response["header"]["message"] = "Success";
 
@@ -1392,6 +1415,35 @@ function getBabyGrowth() {
     echo json_encode($response);
 
 }
+
+function getLastGrowthValueOfUser($user_id){
+
+	global $app, $db, $response;
+    $sql = "SELECT * FROM growth WHERE user_id=$user_id order by growth_id desc limit 1";
+
+    try{
+
+        $stmt   = $db->query($sql);
+        $growth  = $stmt->fetchAll(PDO::FETCH_NAMED);
+
+        $message = array();
+
+        if(count($growth) > 0)
+	        $message = getGrowthTrackers($user_id,$growth[0]['weight'],$growth[0]['height'],$growth[0]['date']);
+
+		return $message;
+    }
+    catch(PDOException $e)
+    {
+
+    	return array();
+       // $response["header"]["error"] = "1";
+       // $response["header"]["message"] = $e->getMessage();
+    }
+
+
+}
+
 
 
 function editProfile() {
@@ -1542,6 +1594,43 @@ function babyAvailable($user_id)
         else
         {
             return true;
+        }
+    }
+    catch(PDOException $e)
+    {
+        //debug($e->getMessage(),1);
+        return false;
+    }
+}
+
+function babyGrowthDataAvailable($user_id, $baby_id, $date)
+{
+    global $db;
+
+    $month = date("m",strtotime($date));
+    $year = date("Y",strtotime($date));
+
+
+
+    $sql = "SELECT * FROM growth WHERE user_id=:user_id and baby_id=:baby_id and MONTH(date) = :month and YEAR(date) = :year limit 1";
+
+
+    try{
+        $stmt = $db->prepare($sql);
+        $stmt->bindParam(":user_id", $user_id);
+        $stmt->bindParam(":baby_id", $baby_id);
+        $stmt->bindParam(":month", $month);
+        $stmt->bindParam(":year", $year);
+        $result = $stmt->execute();
+        $info  = $stmt->fetch(PDO::FETCH_NAMED);
+
+        if($stmt->rowCount() > 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
     catch(PDOException $e)
