@@ -984,14 +984,19 @@ function createBabyFolders($baby_id)
     if(!file_exists("images/$baby_id"))
     {
         mkdir("images/$baby_id");
-        $sql = "select * from milestones";
-        $stmt   = $db->query($sql);
-        $milestones  = $stmt->fetchAll(PDO::FETCH_NAMED);
+    }
 
-        foreach($milestones as $milestone)
+    $sql = "select * from milestones";
+    $stmt   = $db->query($sql);
+    $milestones  = $stmt->fetchAll(PDO::FETCH_NAMED);
+
+    foreach($milestones as $milestone)
+    {
+        if(!file_exists("images/$baby_id/".$milestone['milestone_id']))
         {
             mkdir("images/$baby_id/".$milestone['milestone_id']);
         }
+
     }
 
 }
