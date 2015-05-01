@@ -1419,7 +1419,7 @@ function getBabyGrowth() {
 function getLastGrowthValueOfUser($user_id){
 
 	global $app, $db, $response;
-    $sql = "SELECT * FROM growth WHERE user_id=$user_id order by growth_id desc limit 1";
+    $sql = "SELECT * FROM growth WHERE user_id=$user_id order by date desc limit 1";
 
     try{
 
