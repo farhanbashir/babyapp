@@ -100,7 +100,7 @@ function getMilestones($baby_id,$cat_id)
     $milestones = array();
 
     //$sql = "SELECT milestone_id,milestone_name FROM milestones";
-    $sql =  "SELECT m.milestone_id,m.milestone_name,
+    $sql =  "SELECT m.milestone_id,m.milestone_name,m.milestone_name_ar,
             (select image from album_images where baby_id=$baby_id and milestone_id=m.milestone_id limit 1) as album_cover,
             (select image from baby_milestones where baby_id=$baby_id and milestone_id=m.milestone_id order by baby_milestone_id desc limit 1) as last_image
             FROM milestones m where cat_id=$cat_id
