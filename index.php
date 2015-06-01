@@ -35,6 +35,8 @@ $app->post('/editBabyProfile','editBabyProfile');
 $app->post("/login",'login');
 $app->post('/updatePassword','updatePassword');
 $app->post('/updatePhotoInMilestone','updatePhotoInMilestone');
+$app->post('/deletePhotoInMilestone','deletePhotoInMilestone');
+
 $app->post('/imgSave','imgSave');
 $app->post('/editProfile','editProfile');
 $app->post('/askExpert','askExpert');
@@ -798,6 +800,54 @@ function setBabyProfile() {
     echo json_encode($response);
 
 }
+
+
+function deletePhotoInMilestone() {
+    global $app, $db, $response;
+
+    $req = $app->request(); // Getting parameter with names
+    $baby_milestone_id = $req->params('baby_milestone_id'); // Getting parameter with names
+    $image = '';
+
+    $sql = "SELECT * FROM baby_milestones where baby_milestone_id = ".$baby_milestone_id;
+    $delete_sql = "delete FROM baby_milestones where baby_milestone_id = ".$baby_milestone_id;
+
+    try{
+        
+        $stmt = $db->prepare($sql);
+        $stmt->execute();
+        $data  = $stmt->fetch(PDO::FETCH_NAMED);
+
+        if(is_array($data) && count($data))
+        {
+            if($data["image"])
+            {
+      			$image_path = $data['image'];
+		        $stmt = $db->prepare($delete_sql);
+       			$stmt->execute();
+       			
+       			 if (file_exists($image_path)) {
+	   				 unlink($image_path);
+ 				 }     			
+       		}
+       }
+
+        $response["header"]["error"] = "0";
+        $response["header"]["message"] = "Successfully removed.";
+
+        }
+        catch(PDOException $e)
+        {
+            $response["header"]["error"] = "1";
+            $response["header"]["message"] = $e->getMessage();
+        }
+    
+
+    $app->response()->header("Content-Type", "application/json");
+    echo json_encode($response);
+
+}
+
 
 function updatePhotoInMilestone() {
     global $app, $db, $response;
@@ -1766,6 +1816,7 @@ function updatePassword()
 
 function sendEmail($data)
 {
+
     $to = "shoaib.hafeez@createmedia-group.com";
     $from = $data["from"];
     $subject = "DADONE - ASK EXPERT ".$data['subject'];
@@ -1840,7 +1891,6 @@ function forgotPassword()
 
         if($result > 0)
         {
-
 
             $temp_password = rand_string(8);
             $md5 = md5($temp_password);
