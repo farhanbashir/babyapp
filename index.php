@@ -100,7 +100,7 @@ function getMilestones($baby_id,$cat_id)
     $milestones = array();
 
     //$sql = "SELECT milestone_id,milestone_name FROM milestones";
-    $sql =  "SELECT m.milestone_id,m.milestone_name,
+    $sql =  "SELECT m.milestone_id,m.milestone_name,m.milestone_name_ar,
             (select image from album_images where baby_id=$baby_id and milestone_id=m.milestone_id limit 1) as album_cover,
             (select image from baby_milestones where baby_id=$baby_id and milestone_id=m.milestone_id order by baby_milestone_id desc limit 1) as last_image
             FROM milestones m where cat_id=$cat_id
@@ -1105,7 +1105,7 @@ function getFeeds($user_id)
         if(is_array($days) && count($days) > 0)
         {
             $day = $days[0]['day'];
-            $sql = "select f.feed_id,f.from,f.to,f.feed,f.intro,f.feed_ar,f.intro_ar,f.milestone_id,m.milestone_name from feeds f left join milestones m on f.milestone_id = m.milestone_id where (($day between `from` and `to`) OR (`from` <= $day)) and is_active=1 order by feed_id desc ";
+            $sql = "select f.feed_id,f.from,f.to,f.feed,f.intro,f.feed_ar,f.intro_ar,f.milestone_id,m.milestone_name ,m.milestone_name_ar from feeds f left join milestones m on f.milestone_id = m.milestone_id where (($day between `from` and `to`) OR (`from` <= $day)) and is_active=1 order by feed_id desc ";
             $stmt   = $db->query($sql);
             $feed  = $stmt->fetchAll(PDO::FETCH_NAMED);
 
