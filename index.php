@@ -1105,7 +1105,7 @@ function getFeeds($user_id)
         if(is_array($days) && count($days) > 0)
         {
             $day = $days[0]['day'];
-            $sql = "select f.feed_id,f.from,f.to,f.feed,f.intro,f.feed_ar,f.intro_ar,f.milestone_id,m.milestone_name from feeds f left join milestones m on f.milestone_id = m.milestone_id where (($day between `from` and `to`) OR (`from` <= $day))";
+            $sql = "select f.feed_id,f.from,f.to,f.feed,f.intro,f.feed_ar,f.intro_ar,f.milestone_id,m.milestone_name from feeds f left join milestones m on f.milestone_id = m.milestone_id where (($day between `from` and `to`) OR (`from` <= $day)) and is_active=1 order by feed_id desc ";
             $stmt   = $db->query($sql);
             $feed  = $stmt->fetchAll(PDO::FETCH_NAMED);
 
