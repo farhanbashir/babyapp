@@ -712,7 +712,7 @@ function signup() {
                 $stmt->bindParam(":image", $user_image);
                 $stmt->execute();
 
-                $email_data = array('to'=>$email,'subject'=>'Danone - Please verify your email', 'message'=>'Your verification code is '.substr($password,0,6));
+                $email_data = array('from'=>$config['admin_email'],'to'=>$email,'subject'=>'Danone - Please verify your email', 'message'=>'Your verification code is '.substr($password,0,6));
                 //sendEmail($email_data );
 
                 $user["user_id"] = $db->lastInsertId();
@@ -1038,7 +1038,8 @@ function askExpert() {
             $stmt->bindParam(":message", $message);
             $stmt->execute();
 
-            sendEmail(array("from"=>$email,"subject"=>$subject,"message"=>$message));
+            $subject = "DADONE - ASK EXPERT ".$subject;
+            sendEmail(array("to"=>$config["admin_email"],"from"=>$email,"subject"=>$subject,"message"=>$message));
 
             $response["header"]["error"] = "0";
             $response["header"]["message"] = $config["message_success_en"];
@@ -1875,9 +1876,9 @@ function updatePassword()
 
 function sendEmail($data)
 {
-    $to = "shaoaib.hafeez@createmedia-group.com";
+    $to = $data['to'];
     $from = $data["from"];
-    $subject = "DADONE - ASK EXPERT ".$data['subject'];
+    $subject = $data['subject'];
     $message = $data['message'];
     $headers = "From: $from" . "\r\n";
 
@@ -1968,7 +1969,7 @@ function forgotPassword()
 				//email work here
             $subject = 'Danone - Your password has been changed successfully';
             $message = 'Your temporary password is '.$temp_password;
-            $email = array('to'=>$email,'subject'=>$subject, 'message'=>$message);
+            $email = array('to'=>$email, 'from'=>$config["admin_email"],'subject'=>$subject, 'message'=>$message);
             sendEmail($email);
 
             $response["header"]["error"] = "0";

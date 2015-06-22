@@ -9,6 +9,7 @@ $config["google_key"] = 'AIzaSyCJ7btx16PBtyLAhgSQVyTze6f78GUXy0k';
 $config["REMOTE_SOCKET_GOOGLE"] = 'https://android.googleapis.com/gcm/send';
 $config["PASS_PHRASE"] = "12345678";
 $config["REMOTE_SOCKET_APPLE"] = 'ssl://gateway.sandbox.push.apple.com:2195';
+$config["admin_email"] = 'shaoaib.hafeez@createmedia-group.com';
 $config["message_success_en"] = "Success";
 $config["message_success_ar"] = "Success";
 $config["message_error_en"] = "Some error";
