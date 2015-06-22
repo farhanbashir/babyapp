@@ -34,9 +34,9 @@ $app->post('/setBabyProfile','setBabyProfile');
 $app->post('/editBabyProfile','editBabyProfile');
 $app->post("/login",'login');
 $app->post('/updatePassword','updatePassword');
-$app->post('/updatePhotoInMilestone','updatePhotoInMilestone');
 $app->post('/deletePhotoInMilestone','deletePhotoInMilestone');
 
+$app->post('/updatePhotoInMilestone','updatePhotoInMilestone');
 $app->post('/imgSave','imgSave');
 $app->post('/editProfile','editProfile');
 $app->post('/askExpert','askExpert');
@@ -54,7 +54,7 @@ function test1()
 
 function get_user_device_id($user_id)
 {
-    global $db,$app,$response;
+    global $db,$app,$response,$config;
 
     $sql = "SELECT * FROM devices WHERE user_id=$user_id";
 
@@ -70,7 +70,7 @@ function get_user_device_id($user_id)
 
 function getUsers()
 {
-	global $app ,$db, $response;
+	global $app ,$db, $response,$config;
 	$users = array();
 
     $sql = "SELECT * FROM users where is_active=1";
@@ -84,6 +84,7 @@ function getUsers()
     catch(PDOException $e){
         $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
+        $response["header"]["message_arabic"] = $config["message_error_ar"];
     }
 
 
@@ -98,7 +99,7 @@ function getUsers()
 
 function getMilestones($baby_id,$cat_id)
 {
-    global $app ,$db, $response;
+    global $app ,$db, $response,$config;
     $milestones = array();
 
     //$sql = "SELECT milestone_id,milestone_name FROM milestones";
@@ -112,11 +113,13 @@ function getMilestones($baby_id,$cat_id)
         $stmt   = $db->query($sql);
         $milestones  = $stmt->fetchAll(PDO::FETCH_NAMED);
         $response["header"]["error"] = "0";
-        $response["header"]["message"] = "Success";
+        $response["header"]["message"] = $config["message_success_en"];
+        $response["header"]["message_arabic"] = $config["message_success_ar"];
     }
     catch(PDOException $e){
         $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
+        $response["header"]["message_arabic"] = $config["message_error_ar"];
     }
 
 
@@ -131,7 +134,7 @@ function getMilestones($baby_id,$cat_id)
 
 function getMilestoneImages($baby_id,$milestone_id)
 {
-    global $app ,$db, $response;
+    global $app ,$db, $response,$config;
     $milestones = array();
 
     $sql = "SELECT * FROM baby_milestones where baby_id=$baby_id and milestone_id=$milestone_id";
@@ -140,11 +143,13 @@ function getMilestoneImages($baby_id,$milestone_id)
         $stmt   = $db->query($sql);
         $milestones  = $stmt->fetchAll(PDO::FETCH_NAMED);
         $response["header"]["error"] = "0";
-        $response["header"]["message"] = "Success";
+        $response["header"]["message"] = $config["message_success_en"];
+        $response["header"]["message_arabic"] = $config["message_success_ar"];
     }
     catch(PDOException $e){
         $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
+        $response["header"]["message_arabic"] = $config["message_error_ar"];
     }
 
 
@@ -160,7 +165,7 @@ function getMilestoneImages($baby_id,$milestone_id)
 
 function getBabyProfile($user_id)
 {
-    global $app ,$db, $response;
+    global $app ,$db, $response,$config;
     $users = array();
 
     $sql = "SELECT * FROM babies where user_id=:user_id";
@@ -175,11 +180,13 @@ function getBabyProfile($user_id)
             $users = $data;
         }
         $response["header"]["error"] = "0";
-        $response["header"]["message"] = "Success";
+        $response["header"]["message"] = $config["message_success_en"];
+        $response["header"]["message_arabic"] = $config["message_success_ar"];
     }
     catch(PDOException $e){
         $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
+        $response["header"]["message_arabic"] = $config["message_error_ar"];
     }
 
 
@@ -365,7 +372,7 @@ function send_notification_android($registatoin_ids, $message) {
 }
 
 function getProfile($params){
-	global $app,$db;
+	global $app,$db,$config;
     $info = array();
     $user_id = "";
 
@@ -442,19 +449,22 @@ function getProfile($params){
 
 
             $response["header"]["error"] = "0";
-            $response["header"]["message"] = "Success";
+            $response["header"]["message"] = $config["message_success_en"];
+            $response["header"]["message_arabic"] = $config["message_success_ar"];
             $response["body"] = $info;
         }
         else
         {
             $response["header"]["error"] = "1";
-            $response["header"]["message"] = "User not exist";
+            $response["header"]["message"] = $config["message_user_not_exist_en"];
+            $response["header"]["message_arabic"] =  $config["message_user_not_exist_ar"];
         }
 
     }
     catch(PDOException $e){
         $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
+        $response["header"]["message_arabic"] = $config["message_error_ar"];
     }
 
 
@@ -466,7 +476,7 @@ function getProfile($params){
 
 function checkBabyFolder($user_id)
 {
-    global $db;
+    global $db,$config;
 
     $sql = "select * from babies where user_id=:user_id";
     $stmt = $db->prepare($sql);
@@ -486,7 +496,7 @@ function checkBabyFolder($user_id)
 }
 
 function login(){
-    global $app, $db, $response;
+    global $app, $db, $response,$config;
 
     $req = $app->request(); // Getting parameter with names
     $device_id = $req->params('device_id'); // Getting parameter with names
@@ -560,7 +570,8 @@ function login(){
                 }
 
                 $response["header"]["error"] = "0";
-                $response["header"]["message"] = "Success";
+                $response["header"]["message"] = $config["message_success_en"];
+                $response["header"]["message_arabic"] = $config["message_success_ar"];
             }
             /*elseif($data["password"] == MD5($password) && $data['verified'] == 0)
             {
@@ -571,14 +582,16 @@ function login(){
             {
                 $data = array();
                 $response["header"]["error"] = "1";
-                $response["header"]["message"] = "Username or password incorrect";
+                $response["header"]["message"] = $config["message_incorrect_username_en"];
+                $response["header"]["message_arabic"] = $config["message_incorrect_username_ar"];
             }
 
         }
         else
         {
             $response["header"]["error"] = "1";
-            $response["header"]["message"] = "User is not signed up";
+            $response["header"]["message"] = $config["message_user_not_exist_en"];
+            $response["header"]["message_arabic"] = $config["message_user_not_exist_ar"];
         }
 
 
@@ -586,6 +599,7 @@ function login(){
     catch(PDOException $e){
         $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
+        $response["header"]["message_arabic"] = $config["message_error_ar"];
     }
 
 
@@ -599,7 +613,7 @@ function login(){
 
 function insertNotification($data)
 {
-    global $db;
+    global $db,$config;
 
     $from = (isset($data["from"])) ? $data["from"] : 0;
     $to = (isset($data["to"])) ? $data["to"] : 0;
@@ -648,7 +662,7 @@ function rand_string( $length ) {
 }
 
 function signup() {
-	global $app, $db, $response;
+	global $app, $db, $response,$config;
 	$user = array();
 
 	$req = $app->request(); // Getting parameter with names
@@ -680,7 +694,8 @@ function signup() {
                 $user_image = $protocol.$_SERVER['SERVER_NAME'].$path.$user_image;
             } else {
                 $response["header"]["error"] = "1";
-                $response["header"]["message"] = 'Some error';
+                $response["header"]["message"] = $config["message_error_en"];
+                $response["header"]["message_arabic"] = $config["message_error_ar"];
             }
         }
 
@@ -703,20 +718,23 @@ function signup() {
                 $user["user_id"] = $db->lastInsertId();
                 $response["body"] = $user;
                 $response["header"]["error"] = "0";
-                $response["header"]["message"] = "Success";
+                $response["header"]["message"] = $config["message_success_en"];
+                $response["header"]["message_arabic"] = $config["message_success_ar"];
 
             }
             catch(PDOException $e)
             {
                 $response["header"]["error"] = "1";
                 $response["header"]["message"] = $e->getMessage();
+                $response["header"]["message_arabic"] = $config["message_error_ar"];
             }
         }
     }
     else
     {
         $response["header"]["error"] = "1";
-        $response["header"]["message"] = 'User already exist';
+        $response["header"]["message"] = $config["message_user_exist_en"];
+        $response["header"]["message_arabic"] = $config["message_user_exist_ar"];
     }
 
 
@@ -726,7 +744,7 @@ function signup() {
 }
 
 function setBabyProfile() {
-    global $app, $db, $response;
+    global $app, $db, $response,$config;
     $user = array();
 
     $req = $app->request(); // Getting parameter with names
@@ -758,7 +776,8 @@ function setBabyProfile() {
                 $user_image = $protocol.$_SERVER['SERVER_NAME'].$path.$user_image;
             } else {
                 $response["header"]["error"] = "1";
-                $response["header"]["message"] = 'Some error';
+                $response["header"]["message"] = $config["message_error_en"];
+                $response["header"]["message_arabic"] = $config["message_error_ar"];
             }
         }
 
@@ -779,20 +798,23 @@ function setBabyProfile() {
                 createBabyFolders($user["baby_id"]);
                 $response["body"] = $user;
                 $response["header"]["error"] = "0";
-                $response["header"]["message"] = "Success";
+                $response["header"]["message"] = $config["message_success_en"];
+                $response["header"]["message_arabic"] = $config["message_success_ar"];
 
             }
             catch(PDOException $e)
             {
                 $response["header"]["error"] = "1";
                 $response["header"]["message"] = $e->getMessage();
+                $response["header"]["message_arabic"] = $config["message_error_ar"];
             }
         }
     }
     else
     {
         $response["header"]["error"] = "1";
-        $response["header"]["message"] = 'You already have one baby';
+        $response["header"]["message"] = $config["message_already_have_baby_en"];
+        $response["header"]["message_arabic"] = $config["message_already_have_baby_ar"];
     }
 
 
@@ -801,9 +823,8 @@ function setBabyProfile() {
 
 }
 
-
 function deletePhotoInMilestone() {
-    global $app, $db, $response;
+    global $app, $db, $response,$config;
 
     $req = $app->request(); // Getting parameter with names
     $baby_milestone_id = $req->params('baby_milestone_id'); // Getting parameter with names
@@ -820,26 +841,30 @@ function deletePhotoInMilestone() {
 
         if(is_array($data) && count($data))
         {
+
+            $stmt = $db->prepare($delete_sql);
+       	    $stmt->execute();
+
             if($data["image"])
             {
       			$image_path = $data['image'];
-		        $stmt = $db->prepare($delete_sql);
-       			$stmt->execute();
        			
        			 if (file_exists($image_path)) {
-	   				 unlink($image_path);
+	   			 unlink($image_path);
  				 }     			
-       		}
+       	    }
        }
 
         $response["header"]["error"] = "0";
-        $response["header"]["message"] = "Successfully removed.";
+        $response["header"]["message"] = $config["message_successfully_removed_en"];
+        $response["header"]["message_arabic"] = $config["message_successfully_removed_ar"];
 
         }
         catch(PDOException $e)
         {
             $response["header"]["error"] = "1";
             $response["header"]["message"] = $e->getMessage();
+            $response["header"]["message_arabic"] = $config["message_error_ar"];
         }
     
 
@@ -848,9 +873,8 @@ function deletePhotoInMilestone() {
 
 }
 
-
 function updatePhotoInMilestone() {
-    global $app, $db, $response;
+    global $app, $db, $response,$config;
 
     $req = $app->request(); // Getting parameter with names
     $baby_id = $req->params('baby_id'); // Getting parameter with names
@@ -877,7 +901,8 @@ function updatePhotoInMilestone() {
             $user_image = $protocol.$_SERVER['SERVER_NAME'].$path.$user_image;
         } else {
             $response["header"]["error"] = "1";
-            $response["header"]["message"] = 'Some error';
+            $response["header"]["message"] = $config["message_error_en"];
+            $response["header"]["message_arabic"] = $config["message_error_ar"];
         }
     }
 
@@ -893,13 +918,15 @@ function updatePhotoInMilestone() {
             $stmt->execute();
 
             $response["header"]["error"] = "0";
-            $response["header"]["message"] = "Success";
+            $response["header"]["message"] = $config["message_success_en"];
+            $response["header"]["message_arabic"] = $config["message_success_ar"];
 
         }
         catch(PDOException $e)
         {
             $response["header"]["error"] = "1";
             $response["header"]["message"] = $e->getMessage();
+            $response["header"]["message_arabic"] = $config["message_error_ar"];
         }
     }
 
@@ -910,7 +937,7 @@ function updatePhotoInMilestone() {
 }
 
 function setAlbumImage() {
-    global $app, $db, $response;
+    global $app, $db, $response,$config;
 
     $req = $app->request(); // Getting parameter with names
     $baby_id = $req->params('baby_id'); // Getting parameter with names
@@ -931,7 +958,8 @@ function setAlbumImage() {
             $user_image = $protocol.$_SERVER['SERVER_NAME'].$path.$user_image;
         } else {
             $response["header"]["error"] = "1";
-            $response["header"]["message"] = 'Some error';
+            $response["header"]["message"] = $config["message_error_en"];
+            $response["header"]["message_arabic"] = $config["message_error_ar"];
         }
     }
 
@@ -967,13 +995,15 @@ function setAlbumImage() {
             $stmt->execute();
 
             $response["header"]["error"] = "0";
-            $response["header"]["message"] = "Success";
+            $response["header"]["message"] = $config["message_success_en"];
+            $response["header"]["message_arabic"] = $config["message_success_ar"];
 
         }
         catch(PDOException $e)
         {
             $response["header"]["error"] = "1";
             $response["header"]["message"] = $e->getMessage();
+            $response["header"]["message_arabic"] = $config["message_error_ar"];
         }
     }
 
@@ -984,7 +1014,7 @@ function setAlbumImage() {
 }
 
 function askExpert() {
-    global $app, $db, $response;
+    global $app, $db, $response,$config;
 
     $req = $app->request(); // Getting parameter with names
     $user_id = $req->params('user_id'); // Getting parameter with names
@@ -1011,13 +1041,15 @@ function askExpert() {
             sendEmail(array("from"=>$email,"subject"=>$subject,"message"=>$message));
 
             $response["header"]["error"] = "0";
-            $response["header"]["message"] = "Success";
+            $response["header"]["message"] = $config["message_success_en"];
+            $response["header"]["message_arabic"] = $config["message_success_ar"];
 
         }
         catch(PDOException $e)
         {
             $response["header"]["error"] = "1";
             $response["header"]["message"] = $e->getMessage();
+            $response["header"]["message_arabic"] = $config["message_error_ar"];
         }
 
 
@@ -1029,7 +1061,7 @@ function askExpert() {
 
 function createBabyFolders($baby_id)
 {
-    global $db;
+    global $db,$config;
     $milestones = array();
     if(!file_exists("images/$baby_id"))
     {
@@ -1052,7 +1084,7 @@ function createBabyFolders($baby_id)
 }
 
 function editBabyProfile() {
-    global $app, $db, $response;
+    global $app, $db, $response,$config;
 
     $req = $app->request(); // Getting parameter with names
     $first_name = $req->params('first_name'); // Getting parameter with names
@@ -1080,7 +1112,8 @@ function editBabyProfile() {
                 $user_image = $protocol.$_SERVER['SERVER_NAME'].$path.$user_image;
             } else {
                 $response["header"]["error"] = "1";
-                $response["header"]["message"] = 'Some error';
+                $response["header"]["message"] = $config["message_error_en"];
+                $response["header"]["message_arabic"] = $config["message_error_ar"];
             }
         }
 
@@ -1119,20 +1152,23 @@ function editBabyProfile() {
                 //$user["baby_id"] = $db->lastInsertId();
                 //$response["body"] = $user;
                 $response["header"]["error"] = "0";
-                $response["header"]["message"] = "Success";
+                $response["header"]["message"] = $config["message_success_en"];
+                $response["header"]["message_arabic"] = $config["message_success_ar"];
 
             }
             catch(PDOException $e)
             {
                 $response["header"]["error"] = "1";
                 $response["header"]["message"] = $e->getMessage();
+                $response["header"]["message_arabic"] = $config["message_error_ar"];
             }
         }
     }
     else
     {
         $response["header"]["error"] = "1";
-        $response["header"]["message"] = 'You do not have any baby profile configured';
+        $response["header"]["message"] = $config["message_baby_not_present_en"];
+        $response["header"]["message_arabic"] = $config["message_baby_not_present_ar"];
     }
 
 
@@ -1144,7 +1180,7 @@ function editBabyProfile() {
 
 function getFeeds($user_id)
 {
-    global $app, $db, $response;
+    global $app, $db, $response,$config;
     $feed = array();
     $sql = "select floor(DATEDIFF(CURDATE(),dob)/30) as day from babies where user_id=$user_id";
 
@@ -1155,7 +1191,7 @@ function getFeeds($user_id)
         if(is_array($days) && count($days) > 0)
         {
             $day = $days[0]['day'];
-            $sql = "select f.feed_id,f.from,f.to,f.feed,f.intro,f.feed_ar,f.intro_ar,f.milestone_id,m.milestone_name from feeds f left join milestones m on f.milestone_id = m.milestone_id where $day between `from` and `to`";
+            $sql = "select f.feed_id,f.from,f.to,f.feed,f.intro,f.feed_ar,f.intro_ar,f.milestone_id,m.milestone_name ,m.milestone_name_ar from feeds f left join milestones m on f.milestone_id = m.milestone_id where (($day between `from` and `to`) OR (`from` <= $day)) and is_active=1 order by feed_id desc ";
             $stmt   = $db->query($sql);
             $feed  = $stmt->fetchAll(PDO::FETCH_NAMED);
 
@@ -1163,18 +1199,21 @@ function getFeeds($user_id)
         else
         {
             $response["header"]["error"] = "1";
-            $response["header"]["message"] = "Add your baby profile first";
+            $response["header"]["message"] = $config["message_add_baby_en"];
+            $response["header"]["message_arabic"] = $config["message_add_baby_ar"];
         }
 
         $response["body"] = $feed;
         $response["header"]["error"] = "0";
-        $response["header"]["message"] = "Success";
+        $response["header"]["message"] = $config["message_success_en"];
+        $response["header"]["message_arabic"] = $config["message_success_ar"];
 
     }
     catch(PDOException $e)
     {
         $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
+        $response["header"]["message_arabic"] = $config["message_error_ar"];
     }
 
 
@@ -1185,7 +1224,7 @@ function getFeeds($user_id)
 
 function getGrowthTracker()
 {
-    global $app, $db, $response;
+    global $app, $db, $response,$config;
     $req = $app->request(); // Getting parameter with names
     $baby_id = $req->params('baby_id'); // Getting parameter with names
     $user_id = $req->params('user_id'); // Getting parameter with names
@@ -1209,18 +1248,21 @@ function getGrowthTracker()
         else
         {
             $response["header"]["error"] = "1";
-            $response["header"]["message"] = "No Data";
+            $response["header"]["message"] = $config["message_no_data_en"];
+            $response["header"]["message_arabic"] = $config["message_no_data_ar"];
         }
 
         $response["body"] = $feed;
         $response["header"]["error"] = "0";
-        $response["header"]["message"] = "Success";
+        $response["header"]["message"] = $config["message_success_en"];
+        $response["header"]["message_arabic"] = $config["message_success_ar"];
 
     }
     catch(PDOException $e)
     {
         $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
+        $response["header"]["message_arabic"] = $config["message_error_ar"];
     }
 
 
@@ -1232,7 +1274,7 @@ function getGrowthTracker()
 
 function getGrowthTrackers($user_id,$weight,$height,$date)
 {
-	global $db;
+	global $db,$config;
     //global $app, $db, $response;
     //$req = $app->request(); // Getting parameter with names
 
@@ -1320,6 +1362,7 @@ function getGrowthTrackers($user_id,$weight,$height,$date)
     {
         $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
+        $response["header"]["message_arabic"] = $config["message_error_ar"];
     }
 
 
@@ -1329,7 +1372,7 @@ function getGrowthTrackers($user_id,$weight,$height,$date)
 }
 
 function updateBabyGrowth() {
-    global $app, $db, $response;
+    global $app, $db, $response,$config;
     $user = array();
 
     $req = $app->request(); // Getting parameter with names
@@ -1380,13 +1423,15 @@ function updateBabyGrowth() {
 
         $response["body"] = $message;
         $response["header"]["error"] = "0";
-        $response["header"]["message"] = "Success";
+        $response["header"]["message"] = $config["message_success_en"];
+        $response["header"]["message_arabic"] = $config["message_success_ar"];
 
     }
     catch(PDOException $e)
     {
         $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
+        $response["header"]["message_arabic"] = $config["message_error_ar"];
     }
 
 
@@ -1399,7 +1444,7 @@ function updateBabyGrowth() {
 
 function updateBabyProfile($user_id,$baby_id,$weight,$height)
 {
-    global $db;
+    global $db,$config;
 
 
     $sql = "UPDATE babies set weight=:weight,height=:height where user_id=:user_id and baby_id=:baby_id";
@@ -1423,7 +1468,7 @@ function updateBabyProfile($user_id,$baby_id,$weight,$height)
 }
 
 function getBabyGrowth() {
-    global $app, $db, $response;
+    global $app, $db, $response,$config;
 
     $user = array();
 
@@ -1455,13 +1500,15 @@ function getBabyGrowth() {
         $response["body"]['message'] = $message;
 
         $response["header"]["error"] = "0";
-        $response["header"]["message"] = "Success";
+        $response["header"]["message"] = $config["message_success_en"];
+        $response["header"]["message_arabic"] = $config["message_success_ar"];
 
     }
     catch(PDOException $e)
     {
         $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
+        $response["header"]["message_arabic"] = $config["message_error_ar"];
     }
 
 
@@ -1473,7 +1520,7 @@ function getBabyGrowth() {
 
 function getLastGrowthValueOfUser($user_id){
 
-	global $app, $db, $response;
+	global $app, $db, $response,$config;
     $sql = "SELECT * FROM growth WHERE user_id=$user_id order by date desc limit 1";
 
     try{
@@ -1502,7 +1549,7 @@ function getLastGrowthValueOfUser($user_id){
 
 
 function editProfile() {
-	global $app, $db, $response;
+	global $app, $db, $response,$config;
 
 	$req = $app->request(); // Getting parameter with names
     $first_name = $req->params('first_name'); // Getting parameter with names
@@ -1532,7 +1579,8 @@ function editProfile() {
                 $user_image = $protocol.$_SERVER['SERVER_NAME'].$path.$user_image;
             } else {
                 $response["header"]["error"] = "1";
-                $response["header"]["message"] = 'Some error';
+                $response["header"]["message"] = $config["message_error_en"];
+                $response["header"]["message_arabic"] = $config["message_error_ar"];
             }
         }
 
@@ -1568,20 +1616,23 @@ function editProfile() {
      $stmt->execute() ;
 
      $response["header"]["error"] = "0";
-     $response["header"]["message"] = "Success";
+     $response["header"]["message"] = $config["message_success_en"];
+     $response["header"]["message_arabic"] = $config["message_success_ar"];
 
  }
  catch(PDOException $e)
  {
     $response["header"]["error"] = "1";
     $response["header"]["message"] = $e->getMessage();
+    $response["header"]["message_arabic"] = $config["message_error_ar"];
 }
 }
 }
 else
 {
     $response["header"]["error"] = "1";
-    $response["header"]["message"] = 'User not exist';
+    $response["header"]["message"] = $config["message_user_not_exist_en"];
+    $response["header"]["message_arabic"] = $config["message_user_not_exist_ar"];
 }
 
 
@@ -1602,7 +1653,7 @@ function parms($string,$data) {
 
 function userAvailable($email)
 {
-	global $db;
+	global $db,$config;
 
 	$sql = "SELECT * FROM users WHERE email=:email and is_active=1 limit 1";
 
@@ -1631,7 +1682,7 @@ function userAvailable($email)
 
 function babyAvailable($user_id)
 {
-    global $db;
+    global $db,$config;
 
     $sql = "SELECT * FROM babies WHERE user_id=:user_id limit 1";
 
@@ -1660,7 +1711,7 @@ function babyAvailable($user_id)
 
 function babyGrowthDataAvailable($user_id, $baby_id, $date)
 {
-    global $db;
+    global $db,$config;
 
     $month = date("m",strtotime($date));
     $year = date("Y",strtotime($date));
@@ -1697,12 +1748,13 @@ function babyGrowthDataAvailable($user_id, $baby_id, $date)
 
 function imgSave()
 {
-    global $db, $app, $response;
+    global $db, $app, $response,$config;
 
     if(!isset($_FILES['file']))
     {
         $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
+        $response["header"]["message_arabic"] = $config["message_error_ar"];
     }
     else
     {
@@ -1715,7 +1767,8 @@ function imgSave()
             $response["header"]["message"] = $uploadfile;
         } else {
             $response["header"]["error"] = "1";
-            $response["header"]["message"] = 'Some error';
+            $response["header"]["message"] = $config["message_error_en"];
+            $response["header"]["message_arabic"] = $config["message_error_ar"];
         }
     }
 
@@ -1725,7 +1778,7 @@ function imgSave()
 
 function sendMessage()
 {
-    global $app ,$db, $response;
+    global $app ,$db, $response,$config;
     $req = $app->request();
     $message = $req->params('message');
     $from = $req->params('from');
@@ -1743,13 +1796,15 @@ function sendMessage()
         $stmt->bindParam(":datetime", $date);
         $stmt->execute();
         $response["header"]["error"] = "0";
-        $response["header"]["message"] = "Success";
+        $response["header"]["message"] = $config["message_success_en"];
+        $response["header"]["message_arabic"] = $config["message_success_ar"];
 
 
     }
     catch(PDOException $e){
         $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
+        $response["header"]["message_arabic"] = $config["message_error_ar"];
     }
 
     $app->response()->header("Content-Type", "application/json");
@@ -1758,7 +1813,7 @@ function sendMessage()
 
 function updatePassword()
 {
-    global $app ,$db, $response;
+    global $app ,$db, $response,$config;
     $req = $app->request();
     $user_id = $req->params('user_id');
     $old_password = $req->params('old_password');
@@ -1780,7 +1835,8 @@ function updatePassword()
             if($data['password'] != MD5($old_password))
             {
                 $response["header"]["error"] = "1";
-                $response["header"]["message"] = 'Password do not match';
+                $response["header"]["message"] = $config["message_password_not_match_en"];
+                $response["header"]["message_arabic"] = $config["message_password_not_match_ar"];
             }
             else
             {
@@ -1794,19 +1850,22 @@ function updatePassword()
 
                 $stmt->execute();
                 $response["header"]["error"] = "0";
-                $response["header"]["message"] = "Success";
+                $response["header"]["message"] = $config["message_success_en"];
+                $response["header"]["message_arabic"] = $config["message_success_ar"];
             }
         }
         else
         {
             $response["header"]["error"] = "1";
-            $response["header"]["message"] = 'Some error';
+            $response["header"]["message"] = $config["message_error_en"];
+            $response["header"]["message_arabic"] = $config["message_error_ar"];
         }
 
     }
     catch(PDOException $e){
         $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
+        $response["header"]["message_arabic"] = $config["message_error_ar"];
     }
 
     $app->response()->header("Content-Type", "application/json");
@@ -1816,8 +1875,7 @@ function updatePassword()
 
 function sendEmail($data)
 {
-
-    $to = "shoaib.hafeez@createmedia-group.com";
+    $to = "shaoaib.hafeez@createmedia-group.com";
     $from = $data["from"];
     $subject = "DADONE - ASK EXPERT ".$data['subject'];
     $message = $data['message'];
@@ -1828,7 +1886,7 @@ function sendEmail($data)
 
 function verify($email,$code)
 {
-    global $app ,$db, $response;
+    global $app ,$db, $response,$config;
 
 
     $sql = "SELECT * FROM users WHERE email=:email AND SUBSTRING(password from 1 for 6)=:password";
@@ -1853,19 +1911,22 @@ function verify($email,$code)
 
             $stmt->execute();
             $response["header"]["error"] = "0";
-            $response["header"]["message"] = "Success";
+            $response["header"]["message"] = $config["message_success_en"];
+            $response["header"]["message_arabic"] = $config["message_success_ar"];
 
         }
         else
         {
             $response["header"]["error"] = "1";
-            $response["header"]["message"] = 'Some error';
+            $response["header"]["message"] = $config["message_error_en"];
+            $response["header"]["message_arabic"] = $config["message_error_ar"];
         }
 
     }
     catch(PDOException $e){
         $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
+        $response["header"]["message_arabic"] = $config["message_error_ar"];
     }
 
     $app->response()->header("Content-Type", "application/json");
@@ -1875,7 +1936,7 @@ function verify($email,$code)
 
 function forgotPassword()
 {
-    global $app ,$db, $response;
+    global $app ,$db, $response,$config;
     $req = $app->request();
     $email = $req->params('email');
 
@@ -1891,6 +1952,7 @@ function forgotPassword()
 
         if($result > 0)
         {
+
 
             $temp_password = rand_string(8);
             $md5 = md5($temp_password);
@@ -1910,19 +1972,22 @@ function forgotPassword()
             sendEmail($email);
 
             $response["header"]["error"] = "0";
-            $response["header"]["message"] = "Success";
+            $response["header"]["message"] = $config["message_success_en"];
+            $response["header"]["message_arabic"] = $config["message_success_ar"];
 
         }
         else
         {
             $response["header"]["error"] = "1";
-            $response["header"]["message"] = 'Invalid Username';
+            $response["header"]["message"] = $config["message_user_not_exist_en"];
+            $response["header"]["message_arabic"] = $config["message_user_not_exist_ar"];
         }
 
     }
     catch(PDOException $e){
         $response["header"]["error"] = "1";
         $response["header"]["message"] = $e->getMessage();
+        $response["header"]["message_arabic"] = $config["message_error_ar"];
     }
 
     $app->response()->header("Content-Type", "application/json");
