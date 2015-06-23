@@ -1294,8 +1294,10 @@ function getGrowthTrackers($user_id,$weight,$height,$date)
             $sql = "select * from tracks where age = $m and gender=$g";
             $stmt   = $db->query($sql);
             $feed  = $stmt->fetchAll(PDO::FETCH_NAMED);
-			$messageHeight = "";
-			$messageWeight = "";
+            $messageHeight = "";
+			$messageHeightArabic = "";
+            $messageWeight = "";
+			$messageWeightArabic = "";
 
 			$genderText = $g==0?"his":"her";
 
@@ -1307,19 +1309,48 @@ function getGrowthTrackers($user_id,$weight,$height,$date)
 					// BELOW AVERAGE PERCENTILE
 					if($height <= $feedItem['p25']){
 
-						$messageHeight = "is smaller than some children ".$genderText." age.";
+                        // $messageHeight = "is smaller than some children ".$genderText." age.";4
+                        if($g == 0)
+                        {
+                            $messageHeight = $config["message_male_smaller_en"];
+                            $messageHeightArabic = $config["message_male_smaller_ar"];
+                        }   
+                        else
+                        {
+                            $messageHeight = $config["message_female_smaller_en"];
+                            $messageHeightArabic = $config["message_female_smaller_ar"];
+                        } 
+                        
 
 					}
 
 					if($height >= $feedItem['p25'] && $height <= $feedItem['p75']){
 
-						$messageHeight = "is similar to most other children ".$genderText." age.";
+						if($g == 0)
+                        {
+                            $messageHeight = $config["message_male_similar_en"];
+                            $messageHeightArabic = $config["message_male_similar_ar"];
+                        }   
+                        else
+                        {
+                            $messageHeight = $config["message_female_similar_en"];
+                            $messageHeightArabic = $config["message_female_similar_ar"];
+                        }
 
 					}
 
 					if($height >= $feedItem['p75']){
 
-						$messageHeight = "is bigger than some other children ".$genderText." age.";
+						if($g == 0)
+                        {
+                            $messageHeight = $config["message_male_bigger_en"];
+                            $messageHeightArabic = $config["message_male_bigger_ar"];
+                        }   
+                        else
+                        {
+                            $messageHeight = $config["message_female_bigger_en"];
+                            $messageHeightArabic = $config["message_female_bigger_ar"];
+                        }
 
 					}
 
@@ -1332,19 +1363,46 @@ function getGrowthTrackers($user_id,$weight,$height,$date)
 					// BELOW AVERAGE PERCENTILE
 					if($weight <= $feedItem['p25']){
 
-						$messageWeight = "is smaller than some children ".$genderText." age.";
+						if($g == 0)
+                        {
+                            $messageWeight = $config["message_male_smaller_en"];
+                            $messageWeightArabic = $config["message_male_smaller_ar"];
+                        }   
+                        else
+                        {
+                            $messageWeight = $config["message_female_smaller_en"];
+                            $messageWeightArabic = $config["message_female_smaller_ar"];
+                        }
 
 					}
 
 					if($weight >= $feedItem['p25'] && $weight <= $feedItem['p75']){
 
-						$messageWeight = "is similar to most other children ".$genderText." age.";
+						if($g == 0)
+                        {
+                            $messageWeight = $config["message_male_similar_en"];
+                            $messageWeightArabic = $config["message_male_similar_ar"];
+                        }   
+                        else
+                        {
+                            $messageWeight = $config["message_female_similar_en"];
+                            $messageWeightArabic = $config["message_female_similar_ar"];
+                        }
 
 					}
 
 					if($weight >= $feedItem['p75']){
 
-						$messageWeight = "is bigger than some other children ".$genderText." age.";
+						if($g == 0)
+                        {
+                            $messageWeight = $config["message_male_bigger_en"];
+                            $messageWeightArabic = $config["message_male_bigger_ar"];
+                        }   
+                        else
+                        {
+                            $messageWeight = $config["message_female_bigger_en"];
+                            $messageWeightArabic = $config["message_female_bigger_ar"];
+                        }
 
 					}
 
@@ -1354,8 +1412,10 @@ function getGrowthTrackers($user_id,$weight,$height,$date)
 
         }
 		$arr = array();
-		$arr['weight']=$messageWeight;
-		$arr['height']=$messageHeight;
+        $arr['weight']=$messageWeight;
+		$arr['weight_arabic']=$messageWeightArabic;
+        $arr['height']=$messageHeight;
+		$arr['height_arabic']=$messageHeightArabic;
 
 		return $arr;
     }
