@@ -48,7 +48,9 @@ $app->post('/setAlbumImage','setAlbumImage');
 
 function test1()
 {
-    checkFolder(10);
+    $myDateString = '2015-01-01';
+    debug((bool)strtotime($myDateString));
+    //checkFolder(10);
     //debug(file_exists("images/2"));
 }
 
@@ -1097,6 +1099,16 @@ function editBabyProfile() {
     $gender= $req->params('gender');
     $user_image = '';
 
+    if((bool)strtotime($dob) == false)
+    {
+        $response["header"]["error"] = "1";
+        $response["header"]["message"] = $config["message_invalid_date_error_en"];
+        $response["header"]["message_arabic"] = $config["message_invalid_date_error_ar"];
+        $app->response()->header("Content-Type", "application/json");
+        echo json_encode($response);
+        return;
+    }    
+
     if(!babyAvailable($user_id))
     {
         if(isset($_FILES['file']))
@@ -1442,8 +1454,21 @@ function updateBabyGrowth() {
     $weight = $req->params('weight'); // Getting parameter with names
     $height = $req->params('height'); // Getting parameter with names
     $date= $req->params('date');
+    
+    if((bool)strtotime($date) == false)
+    {
+        $response["header"]["error"] = "1";
+        $response["header"]["message"] = $config["message_invalid_date_error_en"];
+        $response["header"]["message_arabic"] = $config["message_invalid_date_error_ar"];
+        $app->response()->header("Content-Type", "application/json");
+        echo json_encode($response);
+        return;
+    }
+
     $month = date("m",strtotime($date));
     $year = date("Y",strtotime($date));
+
+
 
     if(babyGrowthDataAvailable($user_id, $baby_id, $date))
     {

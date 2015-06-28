@@ -44,5 +44,7 @@ $config["message_female_similar_en"] = "Your baby is similar to most other child
 $config["message_female_similar_ar"] = "طفلتك مساوية لاحجام الاطفال في عمرها";
 $config["message_female_bigger_en"] = "Your baby is bigger than some other children of her age";
 $config["message_female_bigger_ar"] = "طفلتك اكبر حجماً من بعض الاطفال في عمرها";
+$config["message_invalid_date_error_en"] = "Date is not valid";
+$config["message_invalid_date_error_ar"] = "Date is not valid";
 
 ?>
