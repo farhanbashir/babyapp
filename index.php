@@ -503,8 +503,9 @@ function login(){
     $req = $app->request(); // Getting parameter with names
     $device_id = $req->params('device_id'); // Getting parameter with names
     $device_type = $req->params('device_type'); // Getting parameter with names
+    $lang = $req->params('lang'); // Getting parameter with names
     //$data = array();
-
+    $lang = ($lang != '') ? $lang : 0;
 
     $email = $req->params('email'); // Getting parameter with names
     $password = $req->params('password'); // Getting parameter with names
@@ -546,25 +547,26 @@ function login(){
                     {
                         //update
 
-                        $sql = "UPDATE devices set uid='$device_id' WHERE user_id=:user_id and type=:device_type";
+                        $sql = "UPDATE devices set uid='$device_id',lang=$lang WHERE user_id=:user_id and type=:device_type";
 
                         $stmt = $db->prepare($sql);
 
                         $stmt->bindParam(":user_id", $data['user_id']);
                         $stmt->bindParam(":device_type", $device_type);
-
+                        
                         $stmt->execute();
                     }
                     else
                     {
                         //insert
-                        $sql = "insert into devices (user_id,uid,`type`) values (:user_id,:device_id,:device_type)";
+                        $sql = "insert into devices (user_id,uid,`type`,lang) values (:user_id,:device_id,:device_type,:lang)";
 
                         $stmt = $db->prepare($sql);
 
                         $stmt->bindParam(":user_id", $data['user_id']);
                         $stmt->bindParam(":device_type", $device_type);
                         $stmt->bindParam(":device_id", $device_id);
+                        $stmt->bindParam(":lang", $lang);
 
                         $stmt->execute();
 
