@@ -1,10 +1,6 @@
 <?php
 $config = array();
 
-$config["db"]["db_host"] = "localhost";
-$config["db"]["db_name"] = "farhan_babyapp";
-$config["db"]["db_user"] = "farhan_economic";
-$config["db"]["db_password"] = "tigragroup3";
 $config["google_key"] = 'AIzaSyCJ7btx16PBtyLAhgSQVyTze6f78GUXy0k';
 $config["REMOTE_SOCKET_GOOGLE"] = 'https://android.googleapis.com/gcm/send';
 $config["PASS_PHRASE"] = "12345678";
@@ -46,5 +42,9 @@ $config["message_female_bigger_en"] = "Your baby is bigger than some other child
 $config["message_female_bigger_ar"] = "طفلتك اكبر حجماً من بعض الاطفال في عمرها";
 $config["message_invalid_date_error_en"] = "Date is not valid";
 $config["message_invalid_date_error_ar"] = "Date is not valid";
+$config["message_12_month_error_en"] = "Baby age must be greater than 12 months.";
+$config["message_12_month_error_ar"] = "Baby age must be greater than 12 months.";
 
+
+include_once('db.php');
 ?>
