@@ -745,6 +745,13 @@ function signup() {
 
 }
 
+function getTotalMonths($date)
+{
+    $interval = date_diff(date_create(), date_create($date));
+    $total_months = ($interval->y *12) + $interval->m;
+    return $total_months;
+}
+
 function setBabyProfile() {
     global $app, $db, $response,$config;
     $user = array();
@@ -757,6 +764,29 @@ function setBabyProfile() {
     $dob= $req->params('dob');
     $gender= $req->params('gender');
     $user_image = '';
+
+    if((bool)strtotime($dob) == false)
+    {
+        $response["header"]["error"] = "1";
+        $response["header"]["message"] = $config["message_invalid_date_error_en"];
+        $response["header"]["message_arabic"] = $config["message_invalid_date_error_ar"];
+        $app->response()->header("Content-Type", "application/json");
+        echo json_encode($response);
+        return;
+    }
+
+    //if child is older than 12 months
+    $total_months = getTotalMonths($dob);
+    if($total_months < 12)
+    {
+        $response["header"]["error"] = "1";
+        $response["header"]["message"] = $config["message_12_month_error_en"];
+        $response["header"]["message_arabic"] = $config["message_12_month_error_ar"];
+        $app->response()->header("Content-Type", "application/json");
+        echo json_encode($response);
+        return;   
+    }    
+    
 
     if(babyAvailable($user_id))
     {
@@ -1107,7 +1137,19 @@ function editBabyProfile() {
         $app->response()->header("Content-Type", "application/json");
         echo json_encode($response);
         return;
-    }    
+    }   
+
+    //if child is older than 12 months
+    $total_months = getTotalMonths($dob);
+    if($total_months < 12)
+    {
+        $response["header"]["error"] = "1";
+        $response["header"]["message"] = $config["message_12_month_error_en"];
+        $response["header"]["message_arabic"] = $config["message_12_month_error_ar"];
+        $app->response()->header("Content-Type", "application/json");
+        echo json_encode($response);
+        return;   
+    }  
 
     if(!babyAvailable($user_id))
     {
