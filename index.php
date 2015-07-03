@@ -12,11 +12,15 @@ $db = new PDO("mysql:host=".$config["db"]["db_host"].";dbname=".$config["db"]["d
 //$db = new NotORM($pdo);
 
 require 'Slim/Slim.php';
+require 'Slim/Middleware.php';
+require 'Slim/Middleware/myMiddleWare.php';
 
 \Slim\Slim::registerAutoloader();
 
 
 $app = new \Slim\Slim(array("MODE" => "development"));
+
+$app->add(new \HttpBasicAuth());
 
 $response = array();
 
@@ -541,13 +545,13 @@ function login(){
 
                     $present = $stmt->fetchColumn();
 
-
+                    $token = bin2hex(openssl_random_pseudo_bytes(16));
 
                     if($present != false)
                     {
                         //update
 
-                        $sql = "UPDATE devices set uid='$device_id',lang=$lang WHERE user_id=:user_id and type=:device_type";
+                        $sql = "UPDATE devices set uid='$device_id',lang=$lang,token='$token' WHERE user_id=:user_id and type=:device_type";
 
                         $stmt = $db->prepare($sql);
 
@@ -559,7 +563,7 @@ function login(){
                     else
                     {
                         //insert
-                        $sql = "insert into devices (user_id,uid,`type`,lang) values (:user_id,:device_id,:device_type,:lang)";
+                        $sql = "insert into devices (user_id,uid,`type`,lang,token) values (:user_id,:device_id,:device_type,:lang,:token)";
 
                         $stmt = $db->prepare($sql);
 
@@ -567,6 +571,7 @@ function login(){
                         $stmt->bindParam(":device_type", $device_type);
                         $stmt->bindParam(":device_id", $device_id);
                         $stmt->bindParam(":lang", $lang);
+                        $stmt->bindParam(":token", $token);
 
                         $stmt->execute();
 
@@ -574,6 +579,7 @@ function login(){
                 }
 
                 $response["header"]["error"] = "0";
+                $response['header']["token"] = $token;
                 $response["header"]["message"] = $config["message_success_en"];
                 $response["header"]["message_arabic"] = $config["message_success_ar"];
             }
