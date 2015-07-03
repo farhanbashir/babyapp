@@ -22,9 +22,15 @@ class HttpBasicAuth extends \Slim\Middleware
      *
      */   
     public function deny_access() {
+        global $config;
         $res = $this->app->response();
         $res->status(401);
-        $res->header('WWW-Authenticate', sprintf('Basic realm="%s"', $this->realm));        
+        $response["header"]["error"] = "1";
+        $response["header"]["message"] = $config["message_invalid_token_en"];
+        $response["header"]["message_arabic"] = $config["message_invalid_token_ar"];
+        $res->header("Content-Type", "application/json");
+        echo json_encode($response);
+        //$res->header('WWW-Authenticate', sprintf('Basic realm="%s"', $this->realm));        
     }
  
     /**

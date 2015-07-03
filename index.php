@@ -37,6 +37,7 @@ $app->post('/signup','signup');
 $app->post('/setBabyProfile','setBabyProfile');
 $app->post('/editBabyProfile','editBabyProfile');
 $app->post("/login",'login');
+$app->post("/logout",'logout');
 $app->post('/updatePassword','updatePassword');
 $app->post('/deletePhotoInMilestone','deletePhotoInMilestone');
 
@@ -501,6 +502,53 @@ function checkBabyFolder($user_id)
     }
 }
 
+function logout()
+{
+    global $app, $db, $response, $config;
+    $req = $app->request(); // Getting parameter with names
+    $userId = $req->headers('Userid');
+    $token = $req->headers('Token');    
+
+    if($userId != '' && $token != '' )
+    {
+        $sql = "UPDATE devices SET token='' WHERE user_id='$userId' AND token='$token'";
+        
+        try{
+            $stmt = $db->prepare($sql);
+            $result = $stmt->execute();
+
+            if($result)
+            {
+                $response["header"]["error"] = "0";
+                $response["header"]["message"] = $config["message_success_en"];
+                $response["header"]["message_arabic"] = $config["message_success_ar"];
+            }
+            else
+            {
+                $response["header"]["error"] = "1";
+                $response["header"]["message"] = $config["message_incorrect_username_en"];
+                $response["header"]["message_arabic"] = $config["message_incorrect_username_ar"];
+            }
+        }
+        catch(PDOException $e)
+        {
+            $response["header"]["error"] = "1";
+            $response["header"]["message"] = $config["message_incorrect_username_en"];
+            $response["header"]["message_arabic"] = $config["message_incorrect_username_ar"];
+        }    
+    }
+    else
+    {
+        $response["header"]["error"] = "1";
+        $response["header"]["message"] = $config["message_incorrect_username_en"];
+        $response["header"]["message_arabic"] = $config["message_incorrect_username_ar"];
+    }
+
+    $app->response()->header("Content-Type", "application/json");
+    echo json_encode($response);
+
+}
+
 function login(){
     global $app, $db, $response,$config;
 
@@ -527,20 +575,21 @@ function login(){
         $stmt->execute();
         //$stmt   = $db->query($sql);
         $data  = $stmt->fetch(PDO::FETCH_NAMED);
-
+        $token = "";
         if(is_array($data) && count($data))
         {
             if($data["password"] == MD5($password))// && $data['verified'] == 1
             {
                 checkBabyFolder($data['user_id']);
 
-                if($device_id != "" && $device_type != "")
+                if($device_type != "")//$device_id != ""
                 {
-                    $sql = "select count(*) from devices where user_id=:user_id and type=:device_type";
+                    $sql = "select count(*) from devices where user_id=:user_id and type=:device_type and lang=:lang";
 
                     $stmt = $db->prepare($sql);
                     $stmt->bindParam(":user_id", $data['user_id']);
                     $stmt->bindParam(":device_type", $device_type);
+                    $stmt->bindParam(":lang", $lang);
                     $stmt->execute();
 
                     $present = $stmt->fetchColumn();
@@ -551,12 +600,13 @@ function login(){
                     {
                         //update
 
-                        $sql = "UPDATE devices set uid='$device_id',lang=$lang,token='$token' WHERE user_id=:user_id and type=:device_type";
+                        $sql = "UPDATE devices set uid='$device_id',lang=$lang,token='$token' WHERE user_id=:user_id and type=:device_type and lang=:lang";
 
                         $stmt = $db->prepare($sql);
 
                         $stmt->bindParam(":user_id", $data['user_id']);
                         $stmt->bindParam(":device_type", $device_type);
+                        $stmt->bindParam(":lang", $lang);
                         
                         $stmt->execute();
                     }

@@ -44,6 +44,8 @@ $config["message_invalid_date_error_en"] = "Date is not valid";
 $config["message_invalid_date_error_ar"] = "Date is not valid";
 $config["message_12_month_error_en"] = "Baby age must be greater than 12 months.";
 $config["message_12_month_error_ar"] = "Baby age must be greater than 12 months.";
+$config["message_invalid_token_en"] = "Invalid token.";
+$config["message_invalid_token_ar"] = "Invalid token.";
 
 
 include_once('db.php');
