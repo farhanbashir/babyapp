@@ -53,10 +53,19 @@ $app->post('/setAlbumImage','setAlbumImage');
 
 function test1()
 {
+global $app;
+$req = $app->request();
+print_r($req->headers);
+echo $userId = $req->headers('Userid');
+echo $token = $req->headers('Token');
+die;
+
     $myDateString = '2015-01-01';
     debug((bool)strtotime($myDateString));
+    send_notification_iphone("07aec77930b871dc201454820f7f85746b3701653df405b1adb11d8f136cea0f","this is message");
     //checkFolder(10);
     //debug(file_exists("images/2"));
+
 }
 
 function get_user_device_id($user_id)
@@ -210,7 +219,7 @@ function getBabyProfile($user_id)
 function send_notification_iphone($deviceToken, $message, $sound='default')
 {
 
-        //$deviceToken = '7229e0f7cc34bd639a31e81802def2c02945b0a89d01ce52c7528f8671ef8f32';
+        $deviceToken = '07aec77930b871dc201454820f7f85746b3701653df405b1adb11d8f136cea0f';
 
         // Put your private key's passphrase here:
         //$passphrase = 'developmentc2gapns';
@@ -221,7 +230,7 @@ function send_notification_iphone($deviceToken, $message, $sound='default')
     $remote_url = $config['REMOTE_SOCKET_APPLE'];
 
         // Put your alert message here:
-        //$message = 'Helo this is first message.';
+        $message = 'Helo this is first message.';
 
         ////////////////////////////////////////////////////////////////////////////////
 

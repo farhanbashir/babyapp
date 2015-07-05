@@ -83,7 +83,7 @@ class HttpBasicAuth extends \Slim\Middleware
     	$req = $this->app->request();
         $res = $this->app->response();
         $currentRoute = $this->app->request()->getPathInfo();
-        $public_routes = array("/signup","/login","/forgotPassword");
+        $public_routes = array("/signup","/login","/forgotPassword","/test1","/setBabyProfile");
 
         if(in_array($currentRoute, $public_routes))
         {
